@@ -30,7 +30,7 @@ No perdás más tiempo buscando, ¡hagamos que lo perdido vuelva a vos!
 
 - **Mas info:**
 
-  _Para subir actualizaciones de codigo crear una PR y esperar a que sea aprobada._
+  _Para subir actualizaciones de codigo crear una **Pull Request** y esperar a que sea aprobada._
   
 
 > English
