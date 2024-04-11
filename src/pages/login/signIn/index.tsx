@@ -7,10 +7,23 @@ import GoogleIcon from "../../../icons/googleIcon/googleIcon";
 import LoginImg from "../../../assets/webp/login-img.webp";
 import AppleIcon from "../../../icons/appleIcon/appleIcon";
 import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
+import { GoogleAuthProvider, getAuth, signInWithPopup, signInWithRedirect } from "firebase/auth";
+// import { useNavigate } from "react-router-dom";
+import { initializeApp } from "firebase/app";
+import firebaseConfig from "../../../firebase";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  // const navigator = useNavigate();
+
+  function signInWithGoogle() {
+    signInWithRedirect(auth, provider);
+    console.log('todo ok')
+  }
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -72,7 +85,7 @@ const SignIn: React.FC = () => {
             <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
           </div>
           <div className="w-full flex justify-center">
-            <LogoCircle logoComponent={<GoogleIcon />} />
+            <LogoCircle logoComponent={<GoogleIcon />} onClick={signInWithGoogle}/>
             <LogoCircle logoComponent={<AppleIcon />} />
             <LogoCircle logoComponent={<FacebookIcon />} />
           </div>
