@@ -1,10 +1,11 @@
 import React from "react";
 import "./App.css";
-import SignIn from "./pages/login/signIn";
+
+import Home from "./pages/Home";
 
 const App: React.FC = () => {
   return <>
-    <SignIn />
+    <Home />
   </>;
 };
 
