@@ -6,4 +6,7 @@ export type ButtonProps = {
     disabled: boolean;
     loading?: boolean;
     roundedSize?: string;
+    width?: string; 
+    height?: string;
+    fontSize?: string;
     }
