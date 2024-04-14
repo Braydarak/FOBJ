@@ -16,10 +16,7 @@ const Button: React.FC<ButtonProps> = ({
   bgColor = "bg-secondary",
   disabled = false,
   loading = false,
-  roundedSize = "rounded-[16px]",
-  width = "w-full", 
-  height = "h-[44px]",
-  fontSize = "text-[16px]", 
+  roundedSize = "rounded-[8px]",
 }) => {
   const buttonText = loading ? (
     <Loader width="w-[30px]" height="h-[30px]" logoSize="20" />
@@ -29,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`font-semibold ${roundedSize} ${width} ${height} ${fontSize} w-full h-[44px] text-[16px] ${bgColor} ${textColor}`}
+      className={`font-semibold ${roundedSize} w-full h-[44px] text-[16px] ${bgColor} ${textColor}`}
       onClick={onClick}
       disabled={disabled || loading}
     >
