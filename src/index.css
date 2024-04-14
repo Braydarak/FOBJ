@@ -16,7 +16,7 @@ body {
 }
 
 .card-shadow {
-  filter: drop-shadow(16px 16px 35px rgba(0, 0, 0, 0.09));
+  filter: drop-shadow(16px 16px 10px rgba(0, 0, 0, 0.09));
 }
 
 .mobile-header {

@@ -7,7 +7,7 @@ import GoogleIcon from "../../../icons/googleIcon/googleIcon";
 import LoginImg from "../../../assets/webp/login-img.webp";
 import AppleIcon from "../../../icons/appleIcon/appleIcon";
 import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
-import { GoogleAuthProvider, getAuth, signInWithPopup, signInWithRedirect } from "firebase/auth";
+import { GoogleAuthProvider, getAuth, signInWithRedirect } from "firebase/auth";
 // import { useNavigate } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "../../../firebase";
