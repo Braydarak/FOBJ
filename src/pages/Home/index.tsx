@@ -27,7 +27,7 @@ const Home: React.FC = () => {
 
         <LineComponent />
 
-        <div className="flex flex-col md:flex md:justify-center md:items-center md:flex-row justify-between w-full items-center md:mt-10 mt-5 gap-5">
+        <div className="flex flex-col md:flex md:justify-around md:items-center md:flex-row justify-between w-full items-center md:mt-10 mt-5 gap-5">
           <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer">
             <h2 className="uppercase text-backgroundcolor">Buscar</h2>
           </div>
