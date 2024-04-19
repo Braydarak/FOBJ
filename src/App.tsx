@@ -4,6 +4,7 @@ import "./App.css";
 
 import Home from "./pages/Home";
 import SignIn from "./pages/login/signIn";
+import DefaultBrowser from "./pages/defaultBrowser";
 
 const App: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<SignIn />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/defaultBrowser" element={<DefaultBrowser />} />
       </Routes>
     </Router>
   );
