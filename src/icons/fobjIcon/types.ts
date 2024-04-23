@@ -3,5 +3,6 @@ export type FobjIconProps = {
   className?: string; 
   size?: string;
   height?: string;
+  onClick?: () => void;
   };
   

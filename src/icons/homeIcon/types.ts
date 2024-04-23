@@ -1,5 +1,5 @@
 export type HomeIconProps = {
-    color: string;
-    className?: string;
-  };
-  
+  color: string;
+  className?: string;
+  onClick?: () => void;
+};
