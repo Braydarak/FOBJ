@@ -1,13 +1,17 @@
 import React from "react";
 
 interface LineComponentProps {
-  lineWidth?: string;
+  color?: string;
+  border?: string;
 }
 
-const LineComponent: React.FC<LineComponentProps> = ({ lineWidth = "1px" }) => {
+const LineComponent: React.FC<LineComponentProps> = ({
+  color = "bg-inputBorder",
+  border = "border-inputBorder"
+}) => {
   return (
     <div
-      className={`bg-inputBorder border border-inputBorder w-[100%] h-[1px]`}
+      className={`${color} border ${border} w-[100%] h-[1px]`}
     ></div>
   );
 };
