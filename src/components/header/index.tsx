@@ -9,6 +9,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   
   const logoNav = () => navigator('/home');
+  const ConfigPage = () => navigator('/config');
 
   const getHomeColor = () => {
     if (location.pathname === '/home') {
@@ -22,7 +23,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 custom-header">
         <HomeIcon color={getHomeColor()} className="md:order-2" onClick={logoNav} />
         <FobjIcon color="#001F54"className="md:order-1" height="30" onClick={logoNav}/>
-        <ConfigIcon color="#666464" className="md:order-3" />
+        <ConfigIcon color="#666464" className="md:order-3" onClick={ConfigPage}/>
       </div>
     </header>
   );

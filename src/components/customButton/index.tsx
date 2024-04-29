@@ -19,10 +19,13 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   loading = false,
   roundedSize = "rounded-[8px]",
+  font = "font-semibold",
+  borderColor = "border-transparent",
+  withBorder = false,
 }) => {
   const buttonStyles = disabled
     ? `font-semibold ${roundedSize} w-full h-[44px] ${textTransform} ${textSize} ${textColor} bg-disableInput`
-    : `font-semibold ${roundedSize} hover:cursor-pointer w-full h-[44px] ${textTransform} ${textSize} ${bgColor} ${textColor}`;
+    : `${font} ${roundedSize} hover:cursor-pointer w-full h-[44px] ${textTransform} ${textSize} ${bgColor} ${textColor}   ${withBorder ? `border ${borderColor}` : ''}`;
 
   const buttonText = loading ? (
     <Loader width="w-[30px]" height="h-[30px]" logoSize="20" />
