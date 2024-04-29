@@ -11,4 +11,7 @@ export type ButtonProps = {
   fontSize?: string;
   textSize?: string;
   textTransform?: string;
+  font?: string;
+  withBorder?: boolean;
+  borderColor?: string;
 };

@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import SignIn from "./pages/login/signIn";
 import Search from "./pages/search";
 import ObjectInfo from "./pages/objectInfo";
+import ConfigPage from "./pages/config";
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/Info" element={<ObjectInfo/>} />
+        <Route path="/config" element={<ConfigPage/>} />
       </Routes>
     </Router>
   );
