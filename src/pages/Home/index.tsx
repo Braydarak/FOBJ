@@ -11,6 +11,7 @@ const Home: React.FC = () => {
   const navigator = useNavigate();
 
   const searchNavigator = () => navigator('/search');
+  const reportNavigator = () => navigator('/report');
   
   return (
     <div className="overflow-x-hidden w-full flex flex-col h-full justify-between items-stretch">
@@ -37,7 +38,7 @@ const Home: React.FC = () => {
           <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer" onClick={searchNavigator}>
             <h2 className="uppercase text-backgroundcolor">Buscar</h2>
           </div>
-          <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer">
+          <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer" onClick={reportNavigator}>
             <h2 className="uppercase text-backgroundcolor">Reportar</h2>
           </div>
         </div>
