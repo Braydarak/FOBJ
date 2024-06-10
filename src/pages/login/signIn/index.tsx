@@ -134,9 +134,10 @@ const SignIn: React.FC = () => {
             <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
           </div>
           <div className="w-full flex justify-center">
-            <div onClick={handleGoogleSignIn}>
-              <LogoCircle logoComponent={<GoogleIcon />} />
-            </div>
+            <LogoCircle
+              logoComponent={<GoogleIcon />}
+              onClick={handleGoogleSignIn}
+            />
             <LogoCircle logoComponent={<AppleIcon />} />
             <LogoCircle logoComponent={<FacebookIcon />} />
           </div>
