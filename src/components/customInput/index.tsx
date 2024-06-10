@@ -10,6 +10,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   onChange,
   borderColor = "border-inputBorder",
   type = "text",
+  name,
 }) => {
   return (
     <div className="mb-4 w-full">
@@ -20,6 +21,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
         className={`mt-1 p-2 border ${borderColor} text-base md:text-[20px] text-inputText font-lato rounded-md w-full focus:outline-none`}
         type={type}
         placeholder={placeholder}
+        name={name}
         value={value}
         onChange={onChange}
       />
