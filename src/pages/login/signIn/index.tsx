@@ -7,34 +7,78 @@ import GoogleIcon from "../../../icons/googleIcon/googleIcon";
 import LoginImg from "../../../assets/webp/login-img.webp";
 import AppleIcon from "../../../icons/appleIcon/appleIcon";
 import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
-import { GoogleAuthProvider, getAuth, signInWithRedirect } from "firebase/auth";
-// import { useNavigate } from "react-router-dom";
-import { initializeApp } from "firebase/app";
-import firebaseConfig from "../../../firebase";
+import ErrorComponent from "../../../components/error";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../../context/authContext";
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-  // const navigator = useNavigate();
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
 
-  function signInWithGoogle() {
-    signInWithRedirect(auth, provider);
-    console.log('todo ok')
-  }
+  const { login, loginWhitGoogle } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoggingInWithGoogle, setIsLoggingInWithGoogle] = useState(false);
 
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setUser((user) => ({
+      ...user,
+      [name]: value,
+    }));
   };
 
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isLoggingInWithGoogle) return;
+    setError("");
+    try {
+      await login(user.email, user.password);
+      navigate("/home");
+    } catch (err) {
+      if (err instanceof Error) {
+        const errorCode = (err as any).code;
+        let errorMessage = err.message;
+
+        switch (errorCode) {
+          case "auth/invalid-email":
+            errorMessage = "El correo electrónico es inválido.";
+            break;
+          case "auth/email-already-in-use":
+            errorMessage = "El correo electrónico ya está en uso.";
+            break;
+          case "auth/weak-password":
+            errorMessage =
+              "La contraseña debe tener un mínimo de 6 caracteres.";
+            break;
+          default:
+            errorMessage = "Debes ingresar mail y contraseña.";
+        }
+
+        setError(errorMessage);
+      } else {
+        setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
+      }
+    }
   };
 
-  const handleSignIn = () => {
-    console.log("Iniciar sesión con:", email, password);
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoggingInWithGoogle(true);
+      await loginWhitGoogle();
+      setIsLoggingInWithGoogle(false);
+      navigate("/home");
+    } catch (error) {
+      setError("No se pudo iniciar sesión con Google");
+      setIsLoggingInWithGoogle(false);
+    }
+  };
+
+  const handleRegister = () => {
+    navigate("/register");
   };
 
   return (
@@ -53,19 +97,25 @@ const SignIn: React.FC = () => {
           </span>
         </header>
 
-        <form className="w-full flex justify-center items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full flex justify-center items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8"
+        >
+          {error && <ErrorComponent message={error} />}
           <CustomInput
             placeholder="Email"
             label="Email"
-            value={email}
-            onChange={handleEmailChange}
+            name="email"
+            value={user.email}
+            onChange={handleChange}
           />
           <CustomInput
             placeholder="Contraseña"
             type="password"
             label="Contraseña"
-            value={password}
-            onChange={handlePasswordChange}
+            name="password"
+            value={user.password}
+            onChange={handleChange}
             underlabel="Olvidaste la contraseña?"
           />
 
@@ -74,7 +124,6 @@ const SignIn: React.FC = () => {
             textColor={"text-backgroundcolor"}
             bgColor={"bg-secondary"}
             disabled={false}
-            onClick={handleSignIn}
           />
 
           <div className="flex justify-around items-center w-full">
@@ -85,13 +134,19 @@ const SignIn: React.FC = () => {
             <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
           </div>
           <div className="w-full flex justify-center">
-            <LogoCircle logoComponent={<GoogleIcon />} onClick={signInWithGoogle}/>
+            <LogoCircle
+              logoComponent={<GoogleIcon />}
+              onClick={handleGoogleSignIn}
+            />
             <LogoCircle logoComponent={<AppleIcon />} />
             <LogoCircle logoComponent={<FacebookIcon />} />
           </div>
           <div className="w-full flex justify-center items-center text-base md:text-xl">
             <span className="text-inputs mr-2">No tenes cuenta?</span>
-            <span className="text-secondary cursor-pointer hover:underline">
+            <span
+              className="text-secondary cursor-pointer hover:underline"
+              onClick={handleRegister}
+            >
               Crear Cuenta
             </span>
           </div>

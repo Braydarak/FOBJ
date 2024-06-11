@@ -5,14 +5,30 @@ import LogOutIcon from "../../icons/logOutIcon";
 import Card from "../../components/cards";
 import LineComponent from "../../components/lineComponent";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../../context/authContext";
+import Loader from "../../components/loader";
 
 const Home: React.FC = () => {
   const navigator = useNavigate();
+  const { logout, loading } = useAuth();
 
-  const searchNavigator = () => navigator('/search');
-  const reportNavigator = () => navigator('/report');
-  
+  const searchNavigator = () => navigator("/search");
+  const reportNavigator = () => navigator("/report");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    );
+    
+
   return (
     <div className="overflow-x-hidden w-full flex flex-col h-full justify-between items-stretch">
       <Header />
@@ -28,17 +44,25 @@ const Home: React.FC = () => {
           </div>
           <div className="flex items-center">
             <span className="mr-4">icon</span>
-            <LogOutIcon />
+            <div onClick={handleLogout} className="hover:cursor-pointer">
+              <LogOutIcon />
+            </div>
           </div>
         </div>
 
         <LineComponent />
 
         <div className="flex flex-col md:flex md:justify-around md:items-center md:flex-row justify-between w-full items-center md:mt-10 mt-5 gap-5">
-          <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer" onClick={searchNavigator}>
+          <div
+            className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer"
+            onClick={searchNavigator}
+          >
             <h2 className="uppercase text-backgroundcolor">Buscar</h2>
           </div>
-          <div className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer" onClick={reportNavigator}>
+          <div
+            className="md:w-[500px] md:h-[200px] w-full h-[140px] bg-primary rounded-[30px] md:text-6xl text-3xl flex justify-center items-center hover:cursor-pointer"
+            onClick={reportNavigator}
+          >
             <h2 className="uppercase text-backgroundcolor">Reportar</h2>
           </div>
         </div>
@@ -46,7 +70,10 @@ const Home: React.FC = () => {
           <span className="md:text-3xl font-bold text-blackColor self-start justify-self-start ml-1 text-xl">
             Objetos perdidos
           </span>
-          <span className="text-secondary md:text-[25px] text-xs hover:cursor-pointer hover:underline" onClick={searchNavigator}>
+          <span
+            className="text-secondary md:text-[25px] text-xs hover:cursor-pointer hover:underline"
+            onClick={searchNavigator}
+          >
             Buscar
           </span>
         </div>
