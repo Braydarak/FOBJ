@@ -8,4 +8,5 @@ export type CustomInputProps = {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   type?: "text" | "password" | "email" | "number" | "date";
+  onUnderlabelClick?: () => void;
 };

@@ -11,6 +11,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   borderColor = "border-inputBorder",
   type = "text",
   name,
+  onUnderlabelClick,
 }) => {
   return (
     <div className="mb-4 w-full">
@@ -29,7 +30,10 @@ const CustomInput: React.FC<CustomInputProps> = ({
         {error}
       </label>
       <div className="w-full flex justify-end">
-        <label className="text-end text-sm hover:underline mt-1 text-primary font-lato md:text-[14px] cursor-pointer">
+        <label
+          className="text-end text-sm hover:underline mt-1 text-primary font-lato md:text-[14px] cursor-pointer"
+          onClick={onUnderlabelClick}
+        >
           {underlabel}
         </label>
       </div>

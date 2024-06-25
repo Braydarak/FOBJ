@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import FobjIcon from "../../../icons/fobjIcon";
 import CustomInput from "../../../components/customInput";
 import Button from "../../../components/customButton";
 import LogoCircle from "../../../components/logoCircle";
 import GoogleIcon from "../../../icons/googleIcon/googleIcon";
+import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
 import LoginImg from "../../../assets/webp/login-img.webp";
 import AppleIcon from "../../../icons/appleIcon/appleIcon";
-import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
 import ErrorComponent from "../../../components/error";
 import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "../../../context/authContext";
+import FobjIcon from "../../../icons/fobjIcon";
 
 const SignIn: React.FC = () => {
   const [user, setUser] = useState({
@@ -18,10 +17,12 @@ const SignIn: React.FC = () => {
     password: "",
   });
 
-  const { login, loginWhitGoogle } = useAuth();
+  const { login, loginWhitGoogle, loginWithFacebook ,resetPassword } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [verified, setVerified] = useState<string | null>(null);
   const [isLoggingInWithGoogle, setIsLoggingInWithGoogle] = useState(false);
+  const [isLoggingInWithFacebook, setIsLoggingInWithFacebook] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -33,7 +34,8 @@ const SignIn: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoggingInWithGoogle) return;
+    if (isLoggingInWithGoogle|| isLoggingInWithFacebook) return;
+
     setError("");
     try {
       await login(user.email, user.password);
@@ -55,7 +57,7 @@ const SignIn: React.FC = () => {
               "La contraseña debe tener un mínimo de 6 caracteres.";
             break;
           default:
-            errorMessage = "Debes ingresar mail y contraseña.";
+            errorMessage = "El correo o contraseña ingresada no existe.";
         }
 
         setError(errorMessage);
@@ -76,9 +78,40 @@ const SignIn: React.FC = () => {
       setIsLoggingInWithGoogle(false);
     }
   };
+  const handleFacebookLogin = async () => {
+    try {
+      setIsLoggingInWithFacebook(true);
+      await loginWithFacebook();
+      setIsLoggingInWithFacebook(false)
+      navigate("/home");
+    } catch (error: any) {
+      setError("No se pudo iniciar sesión con Facebook"); 
+      setIsLoggingInWithFacebook(false);
+    }
+  };
 
   const handleRegister = () => {
     navigate("/register");
+  };
+
+  const handleUnderlabelClick = async () => {
+    if (!user.email) return setError("Por favor ingresa tu email");
+
+    try {
+      const resetResult = await resetPassword(user.email);
+
+      if (resetResult.success) {
+        setVerified("Te hemos enviado un email de confirmación");
+      } else {
+        if (resetResult.error.code === "auth/user-not-found") {
+          setError("No hay ninguna cuenta registrada con este correo electrónico.");
+        } else {
+          setError("Error al enviar el email de restablecimiento de contraseña.");
+        }
+      }
+    } catch (error) {
+      setError("Error al restablecer la contraseña.");
+    }
   };
 
   return (
@@ -101,6 +134,7 @@ const SignIn: React.FC = () => {
           onSubmit={handleSubmit}
           className="w-full flex justify-center items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8"
         >
+          {verified && <ErrorComponent textColor="text-successGreen" message={verified} />}
           {error && <ErrorComponent message={error} />}
           <CustomInput
             placeholder="Email"
@@ -117,6 +151,7 @@ const SignIn: React.FC = () => {
             value={user.password}
             onChange={handleChange}
             underlabel="Olvidaste la contraseña?"
+            onUnderlabelClick={handleUnderlabelClick}
           />
 
           <Button
@@ -139,7 +174,7 @@ const SignIn: React.FC = () => {
               onClick={handleGoogleSignIn}
             />
             <LogoCircle logoComponent={<AppleIcon />} />
-            <LogoCircle logoComponent={<FacebookIcon />} />
+            <LogoCircle logoComponent={<FacebookIcon />} onClick={handleFacebookLogin} />
           </div>
           <div className="w-full flex justify-center items-center text-base md:text-xl">
             <span className="text-inputs mr-2">No tenes cuenta?</span>
