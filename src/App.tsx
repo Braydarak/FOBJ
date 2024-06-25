@@ -11,7 +11,9 @@ import ConfigPage from "./pages/config";
 import ReportPage from "./pages/report";
 import Register from "./pages/login/register";
 
+
 const App: React.FC = () => {
+  
   return (
     <Router>
       <AuthProvider>

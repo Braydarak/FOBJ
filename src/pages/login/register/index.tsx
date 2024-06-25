@@ -18,6 +18,7 @@ const Register: React.FC = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [verified, setVerified] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -38,7 +39,11 @@ const Register: React.FC = () => {
 
     try {
       await signUp(user.email, user.password);
-      navigate("/");
+      setVerified("Te registraste correctamente. Redirigiendo...");
+      setTimeout(() => {
+        setError(null);
+        navigate("/");
+      }, 2000);
     } catch (err) {
       if (err instanceof Error) {
         const errorCode = (err as any).code;
@@ -65,9 +70,9 @@ const Register: React.FC = () => {
       }
     }
   };
-  const handleLogin = () =>{
-    navigate('/');
-  }
+  const handleLogin = () => {
+    navigate("/");
+  };
 
   return (
     <div className="login-desktop overflow-y-hidden h-screen w-full drop-shadow-sm">
@@ -89,7 +94,8 @@ const Register: React.FC = () => {
           onSubmit={handleSubmit}
           className="w-full flex mt-20 items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8"
         >
-          {error && <ErrorComponent message={error} />}
+          {verified  && <ErrorComponent textColor="text-successGreen" message={verified} />}
+          {error && <ErrorComponent  message={error} />}
           <CustomInput
             placeholder="Email"
             label="Email"
@@ -126,7 +132,7 @@ const Register: React.FC = () => {
               className="text-secondary cursor-pointer hover:underline"
               onClick={handleLogin}
             >
-             Iniciar sesión
+              Iniciar sesión
             </span>
           </div>
         </form>

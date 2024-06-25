@@ -12,7 +12,8 @@ module.exports = {
       inputBorder: "#838383",
       inputText: '#454545',
       cardBG: '#FBFBFB',
-      errorRed: '#CC0000'
+      errorRed: '#CC0000',
+      successGreen: '#16a34a'
     },
     extend: {
       fontFamily: {
