@@ -14,9 +14,10 @@ import { auth } from "../firebase";
 export const authContext = createContext();
 
 export const useAuth = () => {
-  const context = useContext(authContext)
+  const context = useContext(authContext);
   return context;
-}
+};
+
 const resetPassword = async (email) => {
   try {
     await sendPasswordResetEmail(auth, email);
@@ -26,9 +27,7 @@ const resetPassword = async (email) => {
   }
 };
 
-
 export function AuthProvider({ children }) {
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,35 +40,43 @@ export function AuthProvider({ children }) {
   const loginWhitGoogle = () => {
     const GoogleProvider = new GoogleAuthProvider();
     return signInWithPopup(auth, GoogleProvider);
-  }
+  };
 
   const loginWithFacebook = () => {
     const FacebookProvider = new FacebookAuthProvider();
-    FacebookProvider.addScope('email'); 
+    FacebookProvider.addScope('email');
     FacebookProvider.setCustomParameters({
       display: 'popup',
     });
     return signInWithPopup(auth, FacebookProvider);
   };
-  
 
   useEffect(() => {
-    onAuthStateChanged(auth, currentUser => {
-      setUser(currentUser);
+    onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const { displayName, email, photoURL } = currentUser;
+        setUser({ displayName, email, photoURL });
+      } else {
+        setUser(null);
+      }
       setLoading(false);
-    })
+    });
   }, []);
 
-  return <authContext.Provider value={{
-    signUp,
-    login,
-    user,
-    logout,
-    loading,
-    loginWhitGoogle,
-    loginWithFacebook,
-    resetPassword
-  }}>
-    {children}
-  </authContext.Provider>;
+  return (
+    <authContext.Provider
+      value={{
+        signUp,
+        login,
+        user,
+        logout,
+        loading,
+        loginWhitGoogle,
+        loginWithFacebook,
+        resetPassword,
+      }}
+    >
+      {children}
+    </authContext.Provider>
+  );
 }
