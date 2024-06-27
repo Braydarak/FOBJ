@@ -90,7 +90,7 @@ const SignIn: React.FC = () => {
       if (error.code) {
         switch (error.code) {
           case "auth/account-exists-with-different-credential":
-            errorMessage = "Ya existe una cuenta con esta dirección de correo electrónico.";
+            errorMessage = "Ya existe una cuenta con esta dirección de correo electrónico. (Google)";
             break;
           case "auth/cancelled-popup-request":
           case "auth/popup-closed-by-user":
