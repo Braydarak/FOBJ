@@ -82,13 +82,30 @@ const SignIn: React.FC = () => {
     try {
       setIsLoggingInWithFacebook(true);
       await loginWithFacebook();
-      setIsLoggingInWithFacebook(false)
+      setIsLoggingInWithFacebook(false);
       navigate("/home");
     } catch (error: any) {
-      setError("No se pudo iniciar sesión con Facebook"); 
+      console.error("Error during Facebook login:", error); 
+      let errorMessage = "No se pudo iniciar sesión con Facebook";
+      if (error.code) {
+        switch (error.code) {
+          case "auth/account-exists-with-different-credential":
+            errorMessage = "Ya existe una cuenta con esta dirección de correo electrónico.";
+            break;
+          case "auth/cancelled-popup-request":
+          case "auth/popup-closed-by-user":
+            errorMessage = "La ventana emergente de inicio de sesión se cerró antes de completarse.";
+            break;
+          
+          default:
+            errorMessage = "Ocurrió un error inesperado durante el inicio de sesión con Facebook.";
+        }
+      }
+      setError(errorMessage);
       setIsLoggingInWithFacebook(false);
     }
   };
+  
 
   const handleRegister = () => {
     navigate("/register");
