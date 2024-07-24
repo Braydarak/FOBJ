@@ -8,7 +8,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   inputs,
   onInputChange,
   onSubmit,
-  onPreview,
+  
 }) => {
   return (
     <form onSubmit={onSubmit} className="md:flex md:flex-col md:items-center">
@@ -24,8 +24,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
       <div className="md:w-80  w-full mt-10">
         <Button
-          text="Agregar"
-          onClick={onPreview}
+          text="Guardar"
           textColor="text-backgroundcolor"
           bgColor="bg-secondary"
           roundedSize="rounded-[30px]"
