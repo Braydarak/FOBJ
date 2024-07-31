@@ -5,6 +5,20 @@ import firebaseConfig from "../../../firebase";
 import Preview from "../../../components/preview";
 import DynamicForm from "../../../components/dynamicForm";
 import { Field } from "../../../components/preview/types";
+//Actions Redux
+import {
+  updateInputs,
+  writeToFirebase,
+  clearInputs,
+  setValidationError,
+  clearValidationError
+} from "../../../reducers/actions/objectActions";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../reducers/store";
+import { ObjectState } from "../../../reducers/objectReducer";
+import ErrorComponent from "../../../components/error";
+import Loader from "../../../components/loader";
+import { useNavigate } from "react-router-dom";
 
 interface ItemInputFormProps {
   onSubmission: () => void;
@@ -17,22 +31,49 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   onChange,
   selectedOption,
 }) => {
-  const [inputs, setInputs] = useState({
-    name: "",
-    address: "",
-    date: "",
-    documentNumber: "",
-    map: "",
-    color:"",
-    amount:"",
-  });
-  const [showPreview, setShowPreview] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const inputs =
+    useSelector(
+      (state: RootState) =>
+        state.objects[
+          `${selectedOption.toLowerCase()}Inputs` as keyof ObjectState
+        ]
+    ) || {};
+  const success = useSelector((state: RootState) => state.objects.success);
+  const error = useSelector((state: RootState) => state.objects.error);
+  const loading = useSelector((state: RootState) => state.objects.loading);
+  const validationError = useSelector((state: RootState) => state.objects.validationError);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        dispatch(clearInputs(selectedOption.toLowerCase()));
+        dispatch(clearValidationError());
+        navigate("/home");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate, dispatch, selectedOption]);
+
+  
   const handleInputChange = (key: string, value: string) => {
-    setInputs((prevInputs) => ({
-      ...prevInputs,
+    dispatch(
+      updateInputs(`${selectedOption.toLowerCase()}Inputs`, {
+        ...inputs,
+        [key]: value,
+      })
+    );
+    const isValid = Object.values({
+      ...inputs,
       [key]: value,
-    }));
+    }).every((value) => (value as string).trim() !== "");
+
+    if (isValid) {
+      dispatch(clearValidationError()); 
+    }
 
     if (onChange) {
       onChange(key, value);
@@ -48,18 +89,14 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     setShowPreview(true);
   };
 
-  const handleSave = () => {
-    writeToFirebase(inputs);
-    onSubmission();
-  };
-  const handleEdit = () => {
-    setShowPreview(false);
-  };
+    if (!isValid) {
+      dispatch(setValidationError("Por favor, complete todos los campos."));
+      return;
+    }
 
-  const writeToFirebase = (data: any) => {
-    const firebaseApp = initializeApp(firebaseConfig);
-    const database = getDatabase(firebaseApp);
-    push(ref(database, selectedOption), data); 
+    //crear el nuevo objeto
+    dispatch(clearValidationError());
+    dispatch(writeToFirebase(inputs, selectedOption));
   };
 
   const dniFieldsConfig = [
@@ -109,6 +146,29 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   ];
 
   return (
+    <div className="relative">
+    {loading ? (
+      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+        <Loader />
+      </div>
+    ) : (
+      <div className="transition-opacity opacity-100">
+        <div className="flex justify-center">
+          {success && (
+            <ErrorComponent
+              textColor="text-successGreen"
+              message="Formulario enviado con éxito, Redireccionando..."
+            />
+          )}
+          {validationError && (
+              <ErrorComponent
+                message={validationError}
+              />
+            )}
+            {error && !validationError && (
+              <ErrorComponent message={"Error al enviar el formulario"} />
+            )}
+        </div>
     <div>
       {!showPreview ? (
         <DynamicForm
