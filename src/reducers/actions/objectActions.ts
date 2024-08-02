@@ -3,13 +3,11 @@ import { Action } from 'redux';
 import { initializeApp } from "firebase/app";
 import { collection, addDoc, getFirestore, query, where, getDocs } from "firebase/firestore";
 import firebaseConfig from "../../firebase";
-import { 
-    UPDATE_INPUTS,
+import { UPDATE_INPUTS,
     UPDATE_SUCCESS,
     UPDATE_ERROR,
     UPDATE_LOADING,
-    CLEAR_INPUTS,
-    VALIDATION_ERROR,
+    CLEAR_INPUTS, 
     } from '../types';
 
 
@@ -34,13 +32,9 @@ interface UpdateInputsAction {
     type: typeof CLEAR_INPUTS;
     payload: string;
   }
-  interface ValidationErrorAction {
-    type: typeof VALIDATION_ERROR;
-    payload: string | null;
-}
   
 // Tipos de acción para el dispatch
-export type ObjectActionTypes = UpdateInputsAction | UpdateSuccessAction | UpdateErrorAction| UpdateLoadingAction | ClearInputsAction | ValidationErrorAction;
+export type ObjectActionTypes = UpdateInputsAction | UpdateSuccessAction | UpdateErrorAction| UpdateLoadingAction | ClearInputsAction;
 
 // Definir tipo para Thunk
 export type AppThunk = ThunkAction<void, any, unknown, Action<string>>;
@@ -62,14 +56,6 @@ export const clearInputs = (category: string): ClearInputsAction => ({
   type: CLEAR_INPUTS,
   payload: category,
 });
-export const setValidationError = (errorMessage: string | null) => ({
-  type: VALIDATION_ERROR,
-  payload: errorMessage,
-});
-export const clearValidationError = (): ObjectActionTypes => ({
-  type: VALIDATION_ERROR,
-  payload: null,
-});
 
 
 // Enviar datos a Firebase
@@ -90,7 +76,7 @@ export const writeToFirebase = (data: any, selectedOption: string): AppThunk => 
         await addDoc(collection(firestore, selectedOption), data);
         dispatch({ type: UPDATE_SUCCESS });
         console.log('Document written successfully!');
-      } catch (e: any) {
+      } catch (e) {
         dispatch({ type: UPDATE_ERROR, payload: e });
         console.error('Error adding document: ', e);
       }

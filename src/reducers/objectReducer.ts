@@ -1,11 +1,4 @@
-import { 
-  UPDATE_INPUTS, 
-  UPDATE_SUCCESS,
-  UPDATE_ERROR,
-  UPDATE_LOADING,
-  CLEAR_INPUTS,
-  VALIDATION_ERROR,
- } from "./types";
+import { UPDATE_INPUTS, UPDATE_SUCCESS, UPDATE_ERROR, UPDATE_LOADING, CLEAR_INPUTS } from "./types";
 
 export interface Inputs {
   [key: string]: string;
@@ -20,7 +13,6 @@ export interface ObjectState {
   error: any;
   loading: boolean;
   success: boolean;
-  validationError: string | null;
 }
 
 const initialState: ObjectState = {
@@ -58,7 +50,6 @@ const initialState: ObjectState = {
   error: null,
   loading: false,
   success: false,
-  validationError: null,
 };
 const objectReducer = (state = initialState, action: any): ObjectState => {
   switch (action.type) {
@@ -91,13 +82,8 @@ const objectReducer = (state = initialState, action: any): ObjectState => {
         case CLEAR_INPUTS:
           return {
             ...state,
-            [`${action.payload}Inputs`]: initialState[`${action.payload}Inputs` as keyof ObjectState],
+            [`${action.payload}Inputs`]: {},
             success: false,
-          };
-         case VALIDATION_ERROR:
-          return {
-            ...state,
-            validationError: action.payload,
           };
     default:
       return state;

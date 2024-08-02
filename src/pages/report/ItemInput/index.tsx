@@ -1,17 +1,11 @@
-import React, { useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push } from "firebase/database";
-import firebaseConfig from "../../../firebase";
-import Preview from "../../../components/preview";
+import React, { useEffect } from "react";
 import DynamicForm from "../../../components/dynamicForm";
 import { Field } from "../../../components/preview/types";
 //Actions Redux
 import {
   updateInputs,
   writeToFirebase,
-  clearInputs,
-  setValidationError,
-  clearValidationError
+  clearInputs
 } from "../../../reducers/actions/objectActions";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../reducers/store";
@@ -27,7 +21,6 @@ interface ItemInputFormProps {
 }
 
 const ItemInputForm: React.FC<ItemInputFormProps> = ({
-  onSubmission,
   onChange,
   selectedOption,
 }) => {
@@ -44,13 +37,11 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const success = useSelector((state: RootState) => state.objects.success);
   const error = useSelector((state: RootState) => state.objects.error);
   const loading = useSelector((state: RootState) => state.objects.loading);
-  const validationError = useSelector((state: RootState) => state.objects.validationError);
 
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
         dispatch(clearInputs(selectedOption.toLowerCase()));
-        dispatch(clearValidationError());
         navigate("/home");
       }, 3000);
 
@@ -66,14 +57,6 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
         [key]: value,
       })
     );
-    const isValid = Object.values({
-      ...inputs,
-      [key]: value,
-    }).every((value) => (value as string).trim() !== "");
-
-    if (isValid) {
-      dispatch(clearValidationError()); 
-    }
 
     if (onChange) {
       onChange(key, value);
@@ -82,46 +65,43 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setShowPreview(true);
-  };
 
-  const handlePreview = () => {
-    setShowPreview(true);
-  };
+    const isValid = Object.values(inputs).every(
+      (value) => (value as string).trim() !== ""
+    );
 
     if (!isValid) {
-      dispatch(setValidationError("Por favor, complete todos los campos."));
+      alert("Por favor, complete todos los campos.");
       return;
     }
 
     //crear el nuevo objeto
-    dispatch(clearValidationError());
     dispatch(writeToFirebase(inputs, selectedOption));
   };
 
   const dniFieldsConfig = [
-    { key: "name", label: "Nombre"  },
+    { key: "name", label: "Nombre" },
     { key: "documentNumber", label: "Número de Documento", type: "number" },
-    { key: "address", label: "Dirección"  },
-    { key: "date", label: "Fecha de Nacimiento", type:"date" },
-    ];
-  
-  const phoneFields: Field[] = selectedOption === "Phone" ? [
+    { key: "address", label: "Dirección" },
+    { key: "date", label: "Fecha de Nacimiento", type: "date" },
+  ];
+
+  const phoneFieldsConfig = [
     { key: "model", label: "Modelo" },
     { key: "color", label: "Color" },
-    { key: "date", label: "Fecha de Encuentro" },
-    { key: "information", label: "Información" }
-  ] : [];
+    { key: "date", label: "Fecha de Encuentro", type: "date" },
+    { key: "information", label: "Información" },
+  ];
 
-  const clothingFields: Field[] = selectedOption === "Clothing" ? [
+  const clothingFieldsConfig = [
     { key: "brand", label: "Marca" },
-    { key: "date", label: "Fecha de Encuentro" },
-    { key: "description", label: "Descripción de la prenda" }
-  ] : [];
+    { key: "date", label: "Fecha de Encuentro", type: "date" },
+    { key: "description", label: "Descripción de la prenda" },
+  ];
   const cashFieldsConfig = [
     { key: "amount", label: "Cantidad", type: "number" },
     { key: "date", label: "Fecha", type: "date" },
-    { key: "location", label: "Localidad" }
+    { key: "location", label: "Localidad" },
   ];
 
   const otherFieldsConfig = [
@@ -129,13 +109,15 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     { key: "date", label: "Fecha", type: "date" },
   ];
 
-
   const dniFields: Field[] = selectedOption === "Dni" ? dniFieldsConfig : [];
   const cashFields: Field[] = selectedOption === "Cash" ? cashFieldsConfig : [];
-  const otherFields: Field[] = selectedOption === "Other" ? otherFieldsConfig : [];
-  
-  
-  
+  const otherFields: Field[] =
+    selectedOption === "Other" ? otherFieldsConfig : [];
+  const phoneFields: Field[] =
+    selectedOption === "Phone" ? phoneFieldsConfig : [];
+  const clothingFields: Field[] =
+    selectedOption === "Clothing" ? clothingFieldsConfig : [];
+
   const fields: Field[] = [
     ...dniFields,
     ...phoneFields,
@@ -157,37 +139,21 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
           {success && (
             <ErrorComponent
               textColor="text-successGreen"
-              message="Formulario enviado con éxito, Redireccionando..."
+              message="Formulario enviado con éxito"
             />
           )}
-          {validationError && (
-              <ErrorComponent
-                message={validationError}
-              />
-            )}
-            {error && !validationError && (
-              <ErrorComponent message={"Error al enviar el formulario"} />
-            )}
+          {error && <ErrorComponent message={"Error al enviar el formulario"} />}
         </div>
-    <div>
-      {!showPreview ? (
         <DynamicForm
           fields={fields}
           inputs={inputs}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
-          onPreview={handlePreview}
         />
-      ) : (
-        <Preview
-          fields={fields}
-          inputs={inputs}
-          onEdit={handleEdit}
-          onSave={handleSave}
-        />
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 };
 
 export default ItemInputForm;
