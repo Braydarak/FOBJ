@@ -66,19 +66,24 @@ export const writeToFirebase = (data: any, selectedOption: string): AppThunk => 
         const firebaseApp = initializeApp(firebaseConfig);
         const firestore = getFirestore(firebaseApp);
 
-        const q = query(collection(firestore, selectedOption), where("documentNumber", "==", data.documentNumber));
-      const querySnapshot = await getDocs(q);
+        if (selectedOption === "Dni" && !data.documentNumber) {
+          throw new Error('Document number is undefined.');
+        }
+        
 
-      if (!querySnapshot.empty) {
-        throw new Error('Document with the same number already exists.');
-      }
-
+        if (selectedOption === "Dni") {
+          const q = query(collection(firestore, selectedOption), where("documentNumber", "==", data.documentNumber));
+          const querySnapshot = await getDocs(q);
+  
+          if (!querySnapshot.empty) {
+            throw new Error('Document with the same number already exists.');
+          }
+        }
+  
         await addDoc(collection(firestore, selectedOption), data);
         dispatch({ type: UPDATE_SUCCESS });
-        console.log('Document written successfully!');
-      } catch (e) {
-        dispatch({ type: UPDATE_ERROR, payload: e });
-        console.error('Error adding document: ', e);
+      } catch (e: any) {
+        dispatch({ type: UPDATE_ERROR, payload: e.message });
       }
     };
   };

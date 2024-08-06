@@ -17,7 +17,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
           key={field.key}
           label={`${field.label}:`}
           type={field.type === "date" ? "date" : (field.type === "number" ? "number" : "text")}
-          value={inputs[field.key]}
+          value={inputs[field.key] || ""}
           onChange={(e) => onInputChange(field.key, e.target.value)}
         />
       ))}
