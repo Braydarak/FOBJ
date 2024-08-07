@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DynamicForm from "../../../components/dynamicForm";
 import { Field } from "../../../components/preview/types";
 //Actions Redux
 import {
   updateInputs,
   writeToFirebase,
-  clearInputs
+  clearInputs,
 } from "../../../reducers/actions/objectActions";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../reducers/store";
@@ -26,6 +26,9 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
 
   const inputs =
     useSelector(
@@ -41,6 +44,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
+        setValidationMessage(null);
         dispatch(clearInputs(selectedOption.toLowerCase()));
         navigate("/home");
       }, 3000);
@@ -49,17 +53,27 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     }
   }, [success, navigate, dispatch, selectedOption]);
 
-  
   const handleInputChange = (key: string, value: string) => {
+    const updatedInputs = {
+      ...inputs,
+      [key]: value,
+    };
+
     dispatch(
-      updateInputs(`${selectedOption.toLowerCase()}Inputs`, {
-        ...inputs,
-        [key]: value,
-      })
+      updateInputs(`${selectedOption.toLowerCase()}Inputs`, updatedInputs)
     );
 
     if (onChange) {
       onChange(key, value);
+    }
+
+    // Verificar la validez del formulario mientras se actualizan los campos
+    const isValid = Object.values(updatedInputs).every(
+      (val) => (val as string).trim() !== "" && val !== "Seleccionar"
+    );
+
+    if (isValid) {
+      setValidationMessage(null);
     }
   };
 
@@ -67,11 +81,15 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     event.preventDefault();
 
     const isValid = Object.values(inputs).every(
-      (value) => (value as string).trim() !== ""
+      (value) => (value as string).trim() !== "" && value !== "Seleccionar"
     );
 
     if (!isValid) {
-      alert("Por favor, complete todos los campos.");
+      setValidationMessage("Por favor, complete todos los campos.");
+      return;
+    }
+    if (selectedOption === "Dni" && !inputs.documentNumber) {
+      setValidationMessage("El número de documento es requerido.");
       return;
     }
 
@@ -129,31 +147,36 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
 
   return (
     <div className="relative">
-    {loading ? (
-      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
-        <Loader />
-      </div>
-    ) : (
-      <div className="transition-opacity opacity-100">
-        <div className="flex justify-center">
-          {success && (
-            <ErrorComponent
-              textColor="text-successGreen"
-              message="Formulario enviado con éxito"
-            />
-          )}
-          {error && <ErrorComponent message={"Error al enviar el formulario"} />}
+      {loading ? (
+        <div className="inset-0 mt-10 flex items-center justify-center bg-white bg-opacity-80 z-50">
+          <Loader />
         </div>
-        <DynamicForm
-          fields={fields}
-          inputs={inputs}
-          onInputChange={handleInputChange}
-          onSubmit={handleSubmit}
-        />
-      </div>
-    )}
-  </div>
-);
+      ) : (
+        <div className="transition-opacity opacity-100">
+          <div className="flex justify-center">
+            {success && (
+              <ErrorComponent
+                textColor="text-successGreen"
+                message="Formulario enviado con éxito, Redireccionando..."
+              />
+            )}
+            {error && (
+              <ErrorComponent message={"Error al enviar el formulario"} />
+            )}
+            {validationMessage && (
+              <ErrorComponent message={validationMessage} />
+            )}
+          </div>
+          <DynamicForm
+            fields={fields}
+            inputs={inputs}
+            onInputChange={handleInputChange}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ItemInputForm;
