@@ -1,8 +1,7 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import { initializeApp } from "firebase/app";
-import { collection, addDoc, getFirestore, query, where, getDocs } from "firebase/firestore";
-import firebaseConfig from "../../firebase";
+import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { firestore } from "../../firebase";
 import { UPDATE_INPUTS,
     UPDATE_SUCCESS,
     UPDATE_ERROR,
@@ -62,9 +61,7 @@ export const clearInputs = (category: string): ClearInputsAction => ({
 export const writeToFirebase = (data: any, selectedOption: string): AppThunk => {
     return async (dispatch) => {
       try {
-        dispatch({ type: UPDATE_LOADING });
-        const firebaseApp = initializeApp(firebaseConfig);
-        const firestore = getFirestore(firebaseApp);
+        dispatch(setLoading(true))
 
         if (selectedOption === "Dni" && !data.documentNumber) {
           throw new Error('Document number is undefined.');

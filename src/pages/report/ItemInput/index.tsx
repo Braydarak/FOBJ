@@ -13,6 +13,7 @@ import { ObjectState } from "../../../reducers/objectReducer";
 import ErrorComponent from "../../../components/error";
 import Loader from "../../../components/loader";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/authContext";
 
 interface ItemInputFormProps {
   onSubmission: () => void;
@@ -26,6 +27,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
@@ -52,6 +54,12 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       return () => clearTimeout(timer);
     }
   }, [success, navigate, dispatch, selectedOption]);
+
+   useEffect(() => {
+    if (error) {
+      console.log("Error details:", error);
+    }
+  }, [error]);
 
   const handleInputChange = (key: string, value: string) => {
     const updatedInputs = {
@@ -93,8 +101,21 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       return;
     }
 
+    console.log('User:', user);
+
+    if (!user?.email) {
+      setValidationMessage("ID de usuario no disponible.");
+      return;
+    }
+    const cleanedData = Object.fromEntries(
+      Object.entries({
+        ...inputs,
+        userId: user?.email, 
+      }).filter(([_, value]) => value !== undefined)
+    );
+    console.log('Datos a enviar a Firestore:', cleanedData);
     //crear el nuevo objeto
-    dispatch(writeToFirebase(inputs, selectedOption));
+    dispatch(writeToFirebase(cleanedData, selectedOption));
   };
 
   const dniFieldsConfig = [
