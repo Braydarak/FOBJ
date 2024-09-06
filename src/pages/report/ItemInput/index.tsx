@@ -55,11 +55,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     }
   }, [success, navigate, dispatch, selectedOption]);
 
-   useEffect(() => {
-    if (error) {
-      console.log("Error details:", error);
-    }
-  }, [error]);
+  
 
   const handleInputChange = (key: string, value: string) => {
     const updatedInputs = {
@@ -101,7 +97,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       return;
     }
 
-    console.log('User:', user);
+  
 
     if (!user?.email) {
       setValidationMessage("ID de usuario no disponible.");
@@ -113,7 +109,6 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
         userId: user?.email, 
       }).filter(([_, value]) => value !== undefined)
     );
-    console.log('Datos a enviar a Firestore:', cleanedData);
     //crear el nuevo objeto
     dispatch(writeToFirebase(cleanedData, selectedOption));
   };

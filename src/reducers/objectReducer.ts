@@ -1,7 +1,11 @@
-import { UPDATE_INPUTS, UPDATE_SUCCESS, UPDATE_ERROR, UPDATE_LOADING, CLEAR_INPUTS } from "./types";
+import { UPDATE_INPUTS, UPDATE_SUCCESS, UPDATE_ERROR, UPDATE_LOADING, CLEAR_INPUTS,  SET_COLLECTION_DATA } from "./types";
 
 export interface Inputs {
   [key: string]: string;
+}
+
+export interface CollectionData {
+  [key: string]: any[];
 }
 
 export interface ObjectState {
@@ -10,6 +14,7 @@ export interface ObjectState {
   clothingInputs: Inputs;
   cashInputs: Inputs;
   otherInputs: Inputs;
+  collectionData: CollectionData;
   error: any;
   loading: boolean;
   success: boolean;
@@ -47,6 +52,7 @@ const initialState: ObjectState = {
     date: '',
     map: '',
   },
+  collectionData: {},
   error: null,
   loading: false,
   success: false,
@@ -77,7 +83,7 @@ const objectReducer = (state = initialState, action: any): ObjectState => {
       case UPDATE_LOADING:
         return {
           ...state,
-          loading: true,
+          loading: action.payload,
         };
         case CLEAR_INPUTS:
           return {
@@ -85,6 +91,15 @@ const objectReducer = (state = initialState, action: any): ObjectState => {
             [`${action.payload}Inputs`]: {},
             success: false,
           };
+          case SET_COLLECTION_DATA:
+            return {
+              ...state,
+              collectionData: {
+                ...state.collectionData,
+                [action.payload.collectionName]: action.payload.data
+              },
+              loading: false,
+            };
     default:
       return state;
   }

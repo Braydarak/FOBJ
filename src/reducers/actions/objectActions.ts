@@ -6,7 +6,8 @@ import { UPDATE_INPUTS,
     UPDATE_SUCCESS,
     UPDATE_ERROR,
     UPDATE_LOADING,
-    CLEAR_INPUTS, 
+    CLEAR_INPUTS,
+    SET_COLLECTION_DATA, 
     } from '../types';
 
 
@@ -31,9 +32,16 @@ interface UpdateInputsAction {
     type: typeof CLEAR_INPUTS;
     payload: string;
   }
+  interface SetCollectionDataAction {
+    type: typeof SET_COLLECTION_DATA;
+    payload: {
+      collectionName: string;
+      data: any[];
+    };
+  }
   
 // Tipos de acción para el dispatch
-export type ObjectActionTypes = UpdateInputsAction | UpdateSuccessAction | UpdateErrorAction| UpdateLoadingAction | ClearInputsAction;
+export type ObjectActionTypes = UpdateInputsAction | UpdateSuccessAction | UpdateErrorAction| UpdateLoadingAction | ClearInputsAction  | SetCollectionDataAction;
 
 // Definir tipo para Thunk
 export type AppThunk = ThunkAction<void, any, unknown, Action<string>>;
@@ -47,13 +55,17 @@ export const setLoading = (loading: boolean): UpdateLoadingAction => ({
   type: UPDATE_LOADING,
   payload: loading,
 });
-export const updateError = (errorMessage: string): UpdateErrorAction => ({
+export const updateError = (errorMessage: string | null): UpdateErrorAction => ({
   type: UPDATE_ERROR,
   payload: errorMessage,
 });
 export const clearInputs = (category: string): ClearInputsAction => ({
   type: CLEAR_INPUTS,
   payload: category,
+});
+export const setCollectionData = (collectionName: string, data: any[]): SetCollectionDataAction => ({
+  type: SET_COLLECTION_DATA,
+  payload: { collectionName, data },
 });
 
 
@@ -82,5 +94,56 @@ export const writeToFirebase = (data: any, selectedOption: string): AppThunk => 
       } catch (e: any) {
         dispatch({ type: UPDATE_ERROR, payload: e.message });
       }
+      finally {
+        dispatch(setLoading(false));
+      }
     };
   };
+
+
+  // Obtener datos de Firebase
+export const fetchCollectionData = (collectionName: string, searchInput: string): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(updateError(null));
+      let q;
+      
+      if (searchInput) {
+        if (collectionName === 'Dni') {
+          q = query(collection(firestore, collectionName), where('documentNumber', '==', searchInput));
+        } else if (collectionName === 'Cash') {
+          q = query(collection(firestore, collectionName), where('amount', '==', searchInput));
+        }
+      }
+
+      // Si no se especifica búsqueda, consulta toda la colección
+      if (!q) {
+        q = query(collection(firestore, collectionName));
+      }
+      
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => doc.data());
+
+
+      if (data.length === 0) {
+        // Si no hay datos, lanzar un error
+        throw new Error('No se encontraron datos para la búsqueda.');
+      }
+
+      // Despacha la acción para guardar los datos en el estado
+      dispatch(setCollectionData(collectionName, data));
+    
+    
+    } catch (error: any) {
+      dispatch(updateError(error.message));
+    } finally {
+      console.log('Setting loading to false');
+      dispatch(setLoading(false));
+    }
+    setTimeout(() => {
+      const state = getState();
+      console.log('State after fetching data:', state);
+    }, 500);
+  };
+};
