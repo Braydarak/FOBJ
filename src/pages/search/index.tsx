@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Header from "../../components/header";
 import Layout from "../../components/layout";
 import Button from "../../components/customButton";
@@ -11,11 +11,16 @@ import { RootState, AppDispatch } from "../../reducers/store";
 import ObjectCard from "../../components/objectCard";
 import CustomInput from "../../components/customInput";
 import ErrorComponent from "../../components/error";
+import Loader from "../../components/loader";
+import ArrowIcon from "../../icons/arrowIcon/arrowIcon";
 
 const Search: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [inputValue, setInputValue] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [visibleCount, setVisibleCount] = useState<number>(20);
+
   const dispatch: AppDispatch = useDispatch();
   const collectionData = useSelector(
     (state: RootState) => state.objects.collectionData
@@ -43,13 +48,17 @@ const Search: React.FC = () => {
   const handleSearchClick = async () => {
     setErrorMessage(null);
     if (selectedOption) {
+      setIsLoading(true);
       setErrorMessage(null);
       try {
         await dispatch(fetchCollectionData(selectedOption, inputValue));
+        setVisibleCount(20);
       } catch (error) {
         setErrorMessage(
           "No se pudo completar la búsqueda. Inténtelo de nuevo."
         );
+      } finally {
+        setIsLoading(false);
       }
     } else {
       setErrorMessage("Por favor, seleccione una opción.");
@@ -154,8 +163,10 @@ const Search: React.FC = () => {
             />
           </div>
 
-          <div className="mt-28 mb-28 w-4/5 mx-auto flex flex-col justify-center items-center">
-            {errorMessage || error ? (
+          <div className="mt-28 mb-20 w-4/5 mx-auto flex flex-col justify-center items-center">
+          {isLoading ? (
+              <Loader /> 
+            ) : errorMessage || error ? (
               <>
                 <div className="mb-14 w-full">
                   <LineComponent color="bg-inputs" border="border-inputs" />
@@ -178,8 +189,8 @@ const Search: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14"> 
-                {collectionData[selectedOption]?.map(
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 justify-items-center"> 
+                {collectionData[selectedOption]?.slice(0, visibleCount).map(
                   (item: any, index: number) => (
                     <ObjectCard
                       key={index}
@@ -206,6 +217,19 @@ const Search: React.FC = () => {
               </div>
             )}
           </div>
+          <div className="flex justify-center mb-28">
+  {collectionData[selectedOption]?.length > visibleCount && (
+    <button
+      onClick={() => setVisibleCount(visibleCount + 10)}
+      className="flex items-center text-primary hover:text-secondary focus:outline-none"
+    >
+      <ArrowIcon  /> Cargar más
+    </button>
+  )}
+</div>
+
+
+
         </div>
       </Layout>
     </>
