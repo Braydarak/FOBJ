@@ -114,6 +114,12 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
           q = query(collection(firestore, collectionName), where('documentNumber', '==', searchInput));
         } else if (collectionName === 'Cash') {
           q = query(collection(firestore, collectionName), where('amount', '==', searchInput));
+        } else if (collectionName === 'Clothing') {
+          q = query(collection(firestore, collectionName), where('brand', '==', searchInput));
+        }  else if (collectionName === 'Phone') {
+          q = query(collection(firestore, collectionName), where('model', '==', searchInput));
+        }  else if (collectionName === 'Other') {
+          q = query(collection(firestore, collectionName), where('description', '==', searchInput));
         }
       }
 
@@ -123,7 +129,10 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
       }
       
       const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => doc.data());
+      const data = snapshot.docs.map(doc =>  ({
+        ...doc.data(),
+        id: doc.id, // Incluye el ID del documento en los datos
+      }));
 
 
       if (data.length === 0) {

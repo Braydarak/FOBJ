@@ -12,6 +12,7 @@ import ObjectInfo from "./pages/objectInfo";
 import ConfigPage from "./pages/config";
 import ReportPage from "./pages/report";
 import Register from "./pages/login/register";
+import CardDetailsView from "./pages/search/cardDetailsView";
 
 const App: React.FC = () => {
   return (
@@ -26,6 +27,7 @@ const App: React.FC = () => {
             <Route path="/config" element={<ConfigPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/Register" element={<Register />} />
+            <Route path="/cardDetailsView/:id" element={<CardDetailsView />} />
           </Routes>
         </AuthProvider>
       </Provider>
