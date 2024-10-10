@@ -4,6 +4,7 @@ import Layout from "../../components/layout";
 import Button from "../../components/customButton";
 import LineComponent from "../../components/lineComponent";
 import Dropdown from "../../components/dropdown";
+import { useNavigate } from "react-router-dom";
 import { Option } from "../../components/dropdown/types";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCollectionData } from "../../reducers/actions/objectActions";
@@ -25,10 +26,9 @@ const Search: React.FC = () => {
   const collectionData = useSelector(
     (state: RootState) => state.objects.collectionData
   );
-  
+
   const error = useSelector((state: RootState) => state.objects.error);
-
-
+  const navigate = useNavigate();
 
   const handleDropdownChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -38,12 +38,10 @@ const Search: React.FC = () => {
     setErrorMessage(null);
   };
 
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
     setErrorMessage(null);
   };
-
 
   const handleSearchClick = async () => {
     setErrorMessage(null);
@@ -65,6 +63,9 @@ const Search: React.FC = () => {
     }
   };
 
+  const handleCardClick = (item: any) => {
+    navigate(`/cardDetailsView/${item.id}`,{ state: { cardId: item.id, collectionName: selectedOption } });
+  }; //click de la card
 
   const dropdownOptions = {
     placeholder: "Seleccione una opción",
@@ -82,6 +83,12 @@ const Search: React.FC = () => {
         return "ingrese el monto que busca";
       case "Dni":
         return "ingrese su numero de documento";
+      case "Clothing":
+        return "Ingrese la marca de la prenda";
+      case "Phone":
+        return "Ingrese la marca del telefono";
+      case "Other":
+        return "Ingrese el nombre del objeto";
       default:
         return "";
     }
@@ -164,8 +171,8 @@ const Search: React.FC = () => {
           </div>
 
           <div className="mt-28 mb-20 w-4/5 mx-auto flex flex-col justify-center items-center">
-          {isLoading ? (
-              <Loader /> 
+            {isLoading ? (
+              <Loader />
             ) : errorMessage || error ? (
               <>
                 <div className="mb-14 w-full">
@@ -189,9 +196,10 @@ const Search: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 justify-items-center"> 
-                {collectionData[selectedOption]?.slice(0, visibleCount).map(
-                  (item: any, index: number) => (
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 justify-items-center">
+                {collectionData[selectedOption]
+                  ?.slice(0, visibleCount)
+                  .map((item: any, index: number) => (
                     <ObjectCard
                       key={index}
                       objectTop={getObjectCardTitles().top}
@@ -211,25 +219,22 @@ const Search: React.FC = () => {
                       objectBottom={getObjectCardTitles().bottom}
                       dataBottom={item.date}
                       address={item.map}
+                      onClick={() => handleCardClick(item)} // Pasa el objeto completo
                     />
-                  )
-                )}
+                  ))}
               </div>
             )}
           </div>
           <div className="flex justify-center mb-28">
-  {collectionData[selectedOption]?.length > visibleCount && (
-    <button
-      onClick={() => setVisibleCount(visibleCount + 10)}
-      className="flex items-center text-primary hover:text-secondary focus:outline-none"
-    >
-      <ArrowIcon  /> Cargar más
-    </button>
-  )}
-</div>
-
-
-
+            {collectionData[selectedOption]?.length > visibleCount && (
+              <button
+                onClick={() => setVisibleCount(visibleCount + 10)}
+                className="flex items-center text-primary hover:text-secondary focus:outline-none"
+              >
+                <ArrowIcon /> Cargar más
+              </button>
+            )}
+          </div>
         </div>
       </Layout>
     </>

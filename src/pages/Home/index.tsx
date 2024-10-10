@@ -7,7 +7,7 @@ import LineComponent from "../../components/lineComponent";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import Loader from "../../components/loader";
-import UserIcon from "../../components/userIcon"; // Importa tu nuevo componente UserIcon
+import UserIcon from "../../components/userIcon";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
