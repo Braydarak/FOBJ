@@ -10,4 +10,5 @@ export interface DynamicFormProps {
   inputs: { [key: string]: string };
   onInputChange: (key: string, value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  mapAddressHandler: (address: string) => void;
 }

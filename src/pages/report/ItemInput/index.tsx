@@ -55,8 +55,6 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     }
   }, [success, navigate, dispatch, selectedOption]);
 
-  
-
   const handleInputChange = (key: string, value: string) => {
     const updatedInputs = {
       ...inputs,
@@ -97,8 +95,6 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       return;
     }
 
-  
-
     if (!user?.email) {
       setValidationMessage("ID de usuario no disponible.");
       return;
@@ -106,7 +102,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     const cleanedData = Object.fromEntries(
       Object.entries({
         ...inputs,
-        userId: user?.email, 
+        userId: user?.email,
       }).filter(([_, value]) => value !== undefined)
     );
     //crear el nuevo objeto
@@ -160,6 +156,9 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     ...otherFields,
     { key: "map", label: "Mapa" },
   ];
+  const handleAddressSelect = (address: string) => {
+    handleInputChange("map", address); // Actualiza el campo "map" con la dirección seleccionada
+  };
 
   return (
     <div className="relative">
@@ -188,9 +187,10 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
             inputs={inputs}
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
+            mapAddressHandler={handleAddressSelect}
           />
         </div>
-      )}
+      )}      
     </div>
   );
 };
