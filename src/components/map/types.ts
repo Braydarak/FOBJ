@@ -24,7 +24,10 @@ declare module 'leaflet-geosearch' {
 export interface MapProps {
   widthClass?: string;
   heightClass?: string;
-  onAddressSelect: (address: string) => void;
+  onAddressSelect: (data: { address: string; coordinates: [number, number] }) => void;
+  showSearchControl?: boolean;
+  zoomControl?:boolean;
+  coordinates?: [number, number];
 }
 
 export interface LocationMarkerProps {

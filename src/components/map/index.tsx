@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import LocationMarker from "./locationMaker/locationMaker";
 import AddSearchControl from './addSearchControl/addSearchControl';
 import {
   MapContainer,
   TileLayer,
+  Marker,
+  Popup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -20,33 +22,13 @@ L.Icon.Default.mergeOptions({
 
 
 
-const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", onAddressSelect }) => {
-  const [center, setCenter] = useState<[number, number]>([-34.573695, -58.487178]);
+const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", onAddressSelect, showSearchControl = true, zoomControl = true, coordinates }) => {
+ // Establecer la ubicación predeterminada
+ const center: [number, number] = coordinates && coordinates.length === 2 ? coordinates : [-34.573695, -58.487178];
 
-
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCenter([latitude, longitude]); // Actualiza el centro a la ubicación del usuario
-        },
-        () => {
-          console.error(
-            "No se pudo obtener la ubicación actual. Centrado en Buenos Aires."
-          );
-        }
-      );
-    } else {
-      console.error("Geolocalización no soportada. Centrado en Buenos Aires.");
-    }
-  }, []);
-
-  const handleMarkerClick = (position: [number, number], address: string) => {
-    console.log("Clicked Position:", position, "Address:", address);
-    onAddressSelect(address); // Llama a la función pasada como prop
-  };
-
+ const handleMarkerClick = (position: [number, number], address: string) => {
+  onAddressSelect({ address, coordinates: position }); // Llama a la función pasada como prop
+ };
 
   return (
     <div
@@ -55,14 +37,22 @@ const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", 
       <MapContainer
         center={center}
         zoom={16}
-        className="h-96 w-full rounded-[30px] overflow-hidden"
+        zoomControl={zoomControl}
+        className="h-full rounded-[30px] overflow-hidden"
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+         {coordinates && coordinates.length === 2 && ( // Verificar si hay coordenadas válidas
+          <Marker position={coordinates}>
+            <Popup>
+              Coordenadas: {coordinates[0]}, {coordinates[1]}
+            </Popup>
+          </Marker>
+        )}
         <LocationMarker onClick={handleMarkerClick} /> {/* Manejo de clic en el mapa */}
-        <AddSearchControl /> {/* Agregar el control de búsqueda */}
+        {showSearchControl && <AddSearchControl />} {/* Agregar el control de búsqueda */}
       </MapContainer>
     </div>
   );

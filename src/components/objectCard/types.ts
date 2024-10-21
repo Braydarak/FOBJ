@@ -6,6 +6,7 @@ export type ObjectCardProps = {
   dataMiddle: string;
   dataBottom: string;
   address: string;
+  coordinates?: [number, number];
   onClick?: () => void;
   };
   

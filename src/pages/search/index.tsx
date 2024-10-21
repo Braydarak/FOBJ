@@ -64,9 +64,27 @@ const Search: React.FC = () => {
   };
 
   const handleCardClick = (item: any) => {
-    navigate(`/cardDetailsView/${item.id}`,{ state: { cardId: item.id, collectionName: selectedOption } });
-  }; //click de la card
-
+    if (item.coordinates && item.coordinates.length === 2) {
+      const [latitude, longitude] = item.coordinates;
+      
+      if (latitude !== undefined && longitude !== undefined) {
+        // Guardar las coordenadas en el sessionStorage
+        sessionStorage.setItem(
+          "selectedCoordinates",
+          JSON.stringify({ latitude, longitude })
+        );
+        
+        navigate(`/cardDetailsView/${item.id}`, {
+          state: { cardId: item.id, collectionName: selectedOption },
+        });
+      } else {
+        console.warn("Coordenadas no disponibles para el item:", item);
+      }
+    } else {
+      console.warn("Coordenadas no disponibles o incorrectas para el item:", item);
+    }
+  };
+  
   const dropdownOptions = {
     placeholder: "Seleccione una opción",
     items: [
@@ -196,7 +214,7 @@ const Search: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 justify-items-center">
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[10rem] gap-y-[5rem] justify-items-center">
                 {collectionData[selectedOption]
                   ?.slice(0, visibleCount)
                   .map((item: any, index: number) => (
@@ -219,7 +237,10 @@ const Search: React.FC = () => {
                       objectBottom={getObjectCardTitles().bottom}
                       dataBottom={item.date}
                       address={item.map}
-                      onClick={() => handleCardClick(item)} // Pasa el objeto completo
+                      coordinates={item.coordinates && item.coordinates.length === 2
+                        ? [item.coordinates[0], item.coordinates[1]]
+                        : [undefined, undefined]}
+                      onClick={() => handleCardClick(item)}
                     />
                   ))}
               </div>
