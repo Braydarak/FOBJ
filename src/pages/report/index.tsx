@@ -7,7 +7,7 @@ import ReportInput from "./ItemInput";
 
 const ReportPage: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState("");
-  const [showDropdown, setShowDropdown] = useState(true);
+
 
   const dropdownOptions = {
     placeholder: "TIPO DE OBJETO",
@@ -39,14 +39,12 @@ const ReportPage: React.FC = () => {
         <div className="text-2xl w-full font-semibold my-8 uppercase">
           Reportar el objeto
         </div>
-        <div className="w-full md:w-1/2">
-          {showDropdown && (
-            <Dropdown
-              options={dropdownOptions}
-              value={selectedOption}
-              onChange={handleDropdownChange}
-            />
-          )}
+        <div className="w-full md:w-1/2 mb-40 md:mb-0">
+          <Dropdown
+            options={dropdownOptions}
+            value={selectedOption}
+            onChange={handleDropdownChange}
+          />
           {selectedOption && (
             <ReportInput
               onSubmission={handleSubmission}

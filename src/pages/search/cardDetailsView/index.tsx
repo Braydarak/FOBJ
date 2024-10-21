@@ -32,7 +32,7 @@ const CardDetailsView: React.FC = () => {
     };
 
     fetchCardDetails();
-  }, [cardId]);
+  }, [cardId, collectionName]);
 
   if (loading) {
     return <div>Cargando...</div>;

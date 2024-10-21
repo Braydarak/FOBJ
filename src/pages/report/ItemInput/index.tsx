@@ -42,6 +42,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const success = useSelector((state: RootState) => state.objects.success);
   const error = useSelector((state: RootState) => state.objects.error);
   const loading = useSelector((state: RootState) => state.objects.loading);
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     if (success) {
@@ -103,6 +104,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       Object.entries({
         ...inputs,
         userId: user?.email,
+        coordinates: coordinates,
       }).filter(([_, value]) => value !== undefined)
     );
     //crear el nuevo objeto
@@ -156,8 +158,9 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     ...otherFields,
     { key: "map", label: "Mapa" },
   ];
-  const handleAddressSelect = (address: string) => {
+  const handleAddressSelect  = ({ address, coordinates }: { address: string; coordinates: [number, number] }) => {
     handleInputChange("map", address); // Actualiza el campo "map" con la dirección seleccionada
+    setCoordinates(coordinates);
   };
 
   return (
