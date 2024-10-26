@@ -9,4 +9,5 @@ export type CustomInputProps = {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   type?: "text" | "password" | "email" | "number" | "date";
   onUnderlabelClick?: () => void;
+  readOnly?: boolean;
 };

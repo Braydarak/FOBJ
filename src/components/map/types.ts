@@ -26,8 +26,10 @@ export interface MapProps {
   heightClass?: string;
   onAddressSelect: (data: { address: string; coordinates: [number, number] }) => void;
   showSearchControl?: boolean;
+  zoom?: number;
   zoomControl?:boolean;
   coordinates?: [number, number];
+
 }
 
 export interface LocationMarkerProps {

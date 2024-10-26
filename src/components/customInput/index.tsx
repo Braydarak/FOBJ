@@ -12,6 +12,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   type = "text",
   name,
   onUnderlabelClick,
+  readOnly,
 }) => {
   return (
     <div className="mb-4 w-full">
@@ -25,6 +26,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
         name={name}
         value={value}
         onChange={onChange}
+        readOnly={readOnly}
       />
       <label className="block text-sm text-error ml-1 font-lato md:text-[14px] mt-1">
         {error}

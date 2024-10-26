@@ -108,6 +108,7 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
       dispatch(setLoading(true));
       dispatch(updateError(null));
       let q;
+
       
       if (searchInput) {
         if (collectionName === 'Dni') {
@@ -133,6 +134,7 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
         ...doc.data(),
         id: doc.id, // Incluye el ID del documento en los datos
       }));
+      
 
 
       if (data.length === 0) {
@@ -142,7 +144,11 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
 
       // Despacha la acción para guardar los datos en el estado
       dispatch(setCollectionData(collectionName, data));
-    
+      
+      const state = getState();
+      const dataToStore = state.objects.collectionData[collectionName];
+      sessionStorage.setItem("searchedCollectionData", JSON.stringify(dataToStore));
+      
     
     } catch (error: any) {
       dispatch(updateError(error.message));
@@ -150,9 +156,6 @@ export const fetchCollectionData = (collectionName: string, searchInput: string)
       console.log('Setting loading to false');
       dispatch(setLoading(false));
     }
-    setTimeout(() => {
-      const state = getState();
-      console.log('State after fetching data:', state);
-    }, 500);
+    
   };
 };

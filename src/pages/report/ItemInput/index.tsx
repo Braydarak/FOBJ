@@ -44,6 +44,8 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const loading = useSelector((state: RootState) => state.objects.loading);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
+  const isMapReadOnly = true;
+
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
@@ -164,7 +166,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="">
       {loading ? (
         <div className="inset-0 mt-10 flex items-center justify-center bg-white bg-opacity-80 z-50">
           <Loader />
@@ -191,6 +193,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
             mapAddressHandler={handleAddressSelect}
+            mapReadOnly={isMapReadOnly}
           />
         </div>
       )}      

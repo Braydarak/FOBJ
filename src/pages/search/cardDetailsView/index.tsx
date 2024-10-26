@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { doc , getDoc } from "firebase/firestore";
-import { firestore } from "../../../firebase"
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "../../../firebase";
 import Header from "../../../components/header";
 import Layout from "../../../components/layout";
+import Map from "../../../components/map/index";
 import Button from "../../../components/customButton";
 
 const CardDetailsView: React.FC = () => {
   const location = useLocation();
   const { cardId, collectionName } = location.state || {}; // Obtener el id de la tarjeta seleccionada (pasado en el estado de react-router)
   const [cardDetails, setCardDetails] = useState<any>(null); // Estado para los detalles de la tarjeta
-  const [loading, setLoading] = useState(false); // Estado de carga
+  const [loading, setLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
     const fetchCardDetails = async () => {
       if (cardId && collectionName) {
         try {
-          const docRef = doc(firestore, collectionName, cardId); // Ajusta "cards" al nombre de tu colección en Firestore
+          const docRef = doc(firestore, collectionName, cardId);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             setCardDetails(docSnap.data()); // Guardamos los datos en el estado
@@ -42,12 +43,14 @@ const CardDetailsView: React.FC = () => {
     return <div>No se encontraron detalles para esta tarjeta.</div>;
   }
 
+  const { coordinates } = cardDetails;
+
   return (
     <>
       <Header />
       <Layout>
         <h3 className="text-2xl w-full font-semibold my-8 uppercase">
-          Reportado por  {cardDetails.userId || "N/A"}
+          Reportado por {cardDetails.userId || "N/A"}
         </h3>
         <div className="w-full md:grid md:grid-cols-2">
           <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
@@ -83,12 +86,33 @@ const CardDetailsView: React.FC = () => {
               {cardDetails.userId || "N/A"}
             </div>
           </div>
-          <div className="md:w-1/2  md:justify-center  md:items-center md:text-center md:mx-auto">
-            <div className="font-semibold text-2xl w-full text-center mt-8 md:mt-0 uppercase">
+          <div className="md:w-1/2 mx-auto">
+            <div className="font-semibold text-2xl text-center mt-5 md:mt-0 uppercase">
               Encontrado en
             </div>
-            <div className="w-full mt-5 md:mt-10">
-              {cardDetails.map || "Mapa no disponible"}
+            <div className="w-full flex flex-col items-center justify-center">
+              <div className="w-full text-center">
+                {cardDetails.map || "Mapa no disponible"}
+              </div>
+
+              <div className="grid place-items-center w-full h-full">
+                {coordinates && coordinates.length === 2 ? (
+                  <Map
+                    widthClass="w-[300px] md:w-[450px]"
+                    heightClass="h-[150px] md:h-[250px]"
+                    showSearchControl={false}
+                    zoom={14}
+                    zoomControl={false}
+                    coordinates={coordinates}
+                    onAddressSelect={() => {
+                      // Implementar más tarde si es necesario
+                      throw new Error("Function not implemented.");
+                    }}
+                  />
+                ) : (
+                  <p>Coordenadas no disponibles</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
