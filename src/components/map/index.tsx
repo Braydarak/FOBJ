@@ -22,7 +22,7 @@ L.Icon.Default.mergeOptions({
 
 
 
-const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", onAddressSelect, showSearchControl = true, zoomControl = true, coordinates }) => {
+const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", onAddressSelect, showSearchControl = true, zoomControl = true, coordinates, zoom=16 }) => {
  // Establecer la ubicación predeterminada
  const center: [number, number] = coordinates && coordinates.length === 2 ? coordinates : [-34.573695, -58.487178];
 
@@ -32,11 +32,11 @@ const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", 
 
   return (
     <div
-      className={`rounded-[30px] overflow-hidden ${widthClass} ${heightClass}`}
+      className={`rounded-[30px] overflow-hidden ${widthClass} ${heightClass} -z-10`}
     >
       <MapContainer
         center={center}
-        zoom={16}
+        zoom={zoom}
         zoomControl={zoomControl}
         className="h-full rounded-[30px] overflow-hidden"
       >

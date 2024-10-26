@@ -50,6 +50,7 @@ const Search: React.FC = () => {
       setErrorMessage(null);
       try {
         await dispatch(fetchCollectionData(selectedOption, inputValue));
+        
         setVisibleCount(20);
       } catch (error) {
         setErrorMessage(
@@ -68,11 +69,7 @@ const Search: React.FC = () => {
       const [latitude, longitude] = item.coordinates;
       
       if (latitude !== undefined && longitude !== undefined) {
-        // Guardar las coordenadas en el sessionStorage
-        sessionStorage.setItem(
-          "selectedCoordinates",
-          JSON.stringify({ latitude, longitude })
-        );
+       
         
         navigate(`/cardDetailsView/${item.id}`, {
           state: { cardId: item.id, collectionName: selectedOption },
