@@ -10,7 +10,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   onInputChange,
   onSubmit,
   mapAddressHandler,
-  mapReadOnly,
+  ReadOnly,
 }) => {
   return (
     <form onSubmit={onSubmit} className="md:flex md:flex-col md:items-center">
@@ -28,7 +28,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
           value={inputs[field.key] || ""}
           onChange={(e) => onInputChange(field.key, e.target.value)}
           placeholder={field.key === "map" ? "Seleccionar direccion en el mapa..." : undefined}
-          readOnly={field.key === "map" ? mapReadOnly : undefined}
+          readOnly={field.key === "map" ? ReadOnly : undefined}
         />
       ))}
       <div className="flex justify-center w-full mt-4">

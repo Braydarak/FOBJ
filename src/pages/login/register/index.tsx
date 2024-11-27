@@ -5,6 +5,9 @@ import Button from "../../../components/customButton";
 import LoginImg from "../../../assets/webp/login-img.webp";
 import ErrorComponent from "../../../components/error";
 import { useNavigate } from "react-router-dom";
+import { firestore } from "../../../firebase"; 
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 
 import { useAuth } from "../../../context/authContext";
 
@@ -13,6 +16,11 @@ const Register: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    city: "",
   });
 
   const { signUp } = useAuth();
@@ -22,9 +30,14 @@ const Register: React.FC = () => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+
+ const capitalizedValue = ["username", "firstName", "lastName", "city"].includes(name)
+    ? value.charAt(0).toUpperCase() + value.slice(1)
+    : value;
+
     setUser((user) => ({
       ...user,
-      [name]: value,
+      [name]: capitalizedValue,
     }));
   };
 
@@ -32,13 +45,41 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError("");
 
+    // Validación para campos obligatorios
+  for (const key in user) {
+    if (user[key as keyof typeof user].trim() === "") {
+      setError("Todos los campos son obligatorios.");
+      return;
+    }
+  }
+
     if (user.password !== user.confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
     try {
-      await signUp(user.email, user.password);
+
+       // Verifica si el nombre de usuario ya existe en Firestore
+       const usernameQuery = query(
+        collection(firestore, "users"),
+        where("username", "==", user.username)
+      );
+      const usernameSnapshot = await getDocs(usernameQuery);
+
+      if (!usernameSnapshot.empty) {
+        setError("El nombre de usuario ya está en uso.");
+        return; // Detener el flujo si el nombre de usuario está en uso
+      }
+
+
+      await signUp(user.email, user.password, {
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        city: user.city,
+        phoneNumber: user.phoneNumber,
+      });
       setVerified("Te registraste correctamente. Redirigiendo...");
       setTimeout(() => {
         setError(null);
@@ -80,7 +121,7 @@ const Register: React.FC = () => {
         <img alt="login-img" src={LoginImg} className=" bg-cover w-full" />
       </div>
 
-      <div className="flex flex-col h-screen px-7 py-7 md:px-14 justify-between items-center">
+      <div className="flex flex-col h-screen overflow-y-auto px-7 py-7 md:px-14 justify-between items-center">
         <header className="flex justify-center items-center w-full flex-col">
           <h2 className="uppercase text-[32px] md:text-[54px] font-semibold text-primary">
             Registrate
@@ -92,15 +133,50 @@ const Register: React.FC = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="w-full flex mt-20 items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8"
+          className="w-full flex mt-10 mb-10 items-center flex-col h-screen gap-0 relative md:gap-0"
         >
           {verified  && <ErrorComponent textColor="text-successGreen" message={verified} />}
           {error && <ErrorComponent  message={error} />}
+          <CustomInput
+            placeholder="Nombre de Usuario"
+            label="Nombre de Usuario"
+            name="username"
+            value={user.username}
+            onChange={handleChange}
+          />
+          <CustomInput
+            placeholder="Nombre"
+            label="Nombre"
+            name="firstName"
+            value={user.firstName}
+            onChange={handleChange}
+          />
+          <CustomInput
+            placeholder="Apellido"
+            label="Apellido"
+            name="lastName"
+            value={user.lastName}
+            onChange={handleChange}
+          />
+          <CustomInput
+            placeholder="Ciudad"
+            label="Ciudad"
+            name="city"
+            value={user.city}
+            onChange={handleChange}
+          />
           <CustomInput
             placeholder="Email"
             label="Email"
             name="email"
             value={user.email}
+            onChange={handleChange}
+          />
+           <CustomInput
+            placeholder="Teléfono"
+            label="Teléfono"
+            name="phoneNumber"
+            value={user.phoneNumber}
             onChange={handleChange}
           />
           <CustomInput
@@ -119,6 +195,7 @@ const Register: React.FC = () => {
             value={user.confirmPassword}
             onChange={handleChange}
           />
+          
 
           <Button
             text={"Registrarme"}

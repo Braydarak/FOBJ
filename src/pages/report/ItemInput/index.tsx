@@ -44,7 +44,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const loading = useSelector((state: RootState) => state.objects.loading);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-  const isMapReadOnly = true;
+  const isReadOnly = true;
 
   useEffect(() => {
     if (success) {
@@ -161,7 +161,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     { key: "map", label: "Mapa" },
   ];
   const handleAddressSelect  = ({ address, coordinates }: { address: string; coordinates: [number, number] }) => {
-    handleInputChange("map", address); // Actualiza el campo "map" con la dirección seleccionada
+    handleInputChange("map", address);
     setCoordinates(coordinates);
   };
 
@@ -193,7 +193,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
             mapAddressHandler={handleAddressSelect}
-            mapReadOnly={isMapReadOnly}
+            ReadOnly={isReadOnly}
           />
         </div>
       )}      

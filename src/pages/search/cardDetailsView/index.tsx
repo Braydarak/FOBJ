@@ -105,7 +105,6 @@ const CardDetailsView: React.FC = () => {
                     zoomControl={false}
                     coordinates={coordinates}
                     onAddressSelect={() => {
-                      // Implementar más tarde si es necesario
                       throw new Error("Function not implemented.");
                     }}
                   />
