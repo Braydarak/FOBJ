@@ -9,7 +9,10 @@ import {
   signInWithPopup,
   sendPasswordResetEmail
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, firestore } from "../firebase";
+import { getDocs, getDoc, query, where, collection, setDoc, doc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
 
 export const authContext = createContext();
 
@@ -30,18 +33,66 @@ const resetPassword = async (email) => {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const signUp = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+  const signUp = async (email, password, additionalData) => {
+
+      // Verifica si el nombre de usuario ya existe en Firestore
+  const usernameQuery = query(
+    collection(firestore, "users"),
+    where("username", "==", additionalData.username)
+  );
+  const usernameSnapshot = await getDocs(usernameQuery);
+
+  if (!usernameSnapshot.empty) {
+    // Si se encuentra un usuario con el mismo nombre, lanza un error
+    throw new Error("El nombre de usuario ya está en uso.");
+  }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const createdUser = userCredential.user;
+
+    // Guardar datos adicionales en Firestore
+    await setDoc(doc(firestore, "users", createdUser.uid), {
+      email,
+      ...additionalData,
+    });
+
+    return createdUser;
+  };
 
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
 
   const logout = () => signOut(auth);
 
-  const loginWhitGoogle = () => {
-    const GoogleProvider = new GoogleAuthProvider();
-    return signInWithPopup(auth, GoogleProvider);
+
+  //GoogleAhut
+  const checkUserAdditionalData = async (userId) => {
+    const userDoc = await getDoc(doc(firestore, "users", userId));
+    if (userDoc.exists()) {
+      const { firstName, username } = userDoc.data();
+      return Boolean(firstName && username);
+    }
+    return false;
   };
 
+  const loginWhitGoogle = async () => {
+    const GoogleProvider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, GoogleProvider);
+    const user = result.user;
+
+    console.log("Datos del usuario autenticado con Google:", user);
+
+    const hasAdditionalData = await checkUserAdditionalData(user.uid);
+    if (hasAdditionalData) {
+      navigate('/home');
+    } else {
+      navigate('/config');
+    }
+  };
+
+
+  //FacebookAhut
   const loginWithFacebook = () => {
     const FacebookProvider = new FacebookAuthProvider();
     FacebookProvider.addScope('email');

@@ -32,7 +32,7 @@ const Map: React.FC<MapProps> = ({ widthClass = "w-full", heightClass = "h-96", 
 
   return (
     <div
-      className={`rounded-[30px] overflow-hidden ${widthClass} ${heightClass} -z-10`}
+      className={`rounded-[30px] overflow-hidden ${widthClass} ${heightClass} z-10`}
     >
       <MapContainer
         center={center}
