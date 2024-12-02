@@ -12,7 +12,7 @@
     "@types/node": "^16.18.91",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.22",
-    "autoprefixer": "^10.4.19",
+    "autoprefixer": "^10.4.20",
     "firebase": "^10.11.1",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",

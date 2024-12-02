@@ -4,21 +4,15 @@ import { auth, firestore } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Layout from "../../components/layout";
 import Header from "../../components/header";
-import Dropdown from "../../components/dropdown";
-import { Option } from "../../components/dropdown/types";
 import Button from "../../components/customButton";
 import CustomInput from "../../components/customInput";
 import { useAuth } from "../../context/authContext";
+import UserIcon from "../../components/userIcon";
+import Loader from "../../components/loader";
 
 const ConfigPage: React.FC = () => {
   const { user } = useAuth();
-  const dropdownOptions = {
-    placeholder: "TELEFONO",
-    items: [
-      { value: "option1", label: "Usuario" },
-      { value: "option2", label: "Telefono" },
-    ] as Option[],
-  };
+
   const [userData, setUserData] = useState({
     username: "",
     firstName: "",
@@ -35,18 +29,26 @@ const ConfigPage: React.FC = () => {
     email: "",
     phoneNumber: "",
   });
-  const [selectedOption, setSelectedOption] = useState("");
+
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  useEffect(() => {
+    if (userId) {
+      fetchUserData(userId);
+    }
+  }, [userId]);
 
   const fetchUserData = async (uid: string) => {
+    setIsLoading(true);
     const userDoc = doc(firestore, "users", uid);
     const userSnapshot = await getDoc(userDoc);
 
     if (userSnapshot.exists()) {
       setUserData(userSnapshot.data() as any);
     } else {
-      fetchGoogleUserData();
+      await fetchGoogleUserData();
     }
+    setIsLoading(false);
   };
 
   const fetchGoogleUserData = async () => {
@@ -106,6 +108,8 @@ const ConfigPage: React.FC = () => {
     } catch (error) {
       console.error("Error al guardar los datos:", error);
       alert("Hubo un error al guardar los datos.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,21 +122,11 @@ const ConfigPage: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    if (userId) {
-      fetchUserData(userId);
-    }
-  }, [userId, fetchUserData]);
-
   const handleInputChange = (field: keyof typeof userData, value: string) => {
     setInputData((prev) => ({
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedOption(e.target.value);
   };
 
   return (
@@ -142,143 +136,159 @@ const ConfigPage: React.FC = () => {
         <h3 className="text-2xl w-full font-semibold my-8 uppercase">
           configuración
         </h3>
-        <div className="w-full md:grid md:grid-cols-2">
-          <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
-            {/* row 1 */}
-            <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-              usuario
+        <div className={`w-full md:grid ${isLoading ? '' : 'md:grid-cols-2'}`}>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full w-full mt-10">
+              <Loader width="w-[80px]" height="h-[80px]" />
             </div>
-            <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-              {userData.username ? (
-                userData.username
-              ) : (
-                <div className="h-0">
-                  <CustomInput
-                    value={inputData.username}
-                    placeholder="Ingrese el usuario"
-                    onChange={(e) =>
-                      handleInputChange("username", e.target.value)
-                    }
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* row 2 */}
-            <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-              nombre
-            </div>
-            <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-              {userData.firstName ? (
-                userData.firstName
-              ) : (
-                <div className="h-0">
-                  <CustomInput
-                    value={inputData.firstName}
-                    placeholder="Ingrese el nombre"
-                    onChange={(e) =>
-                      handleInputChange("firstName", e.target.value)
-                    }
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* row 3 */}
-            <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-              Apellido
-            </div>
-            <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-              {userData.lastName ? (
-                userData.lastName
-              ) : (
-                <div className="h-0">
-                  <CustomInput
-                    value={inputData.lastName}
-                    placeholder="Ingrese el apellido"
-                    onChange={(e) =>
-                      handleInputChange("lastName", e.target.value)
-                    }
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* row 4 */}
-            <div className="bg-blue-500 text-left text-2xl font-semibold col-span-1 uppercase">
-              email
-            </div>
-            <div className="bg-blue-500 text-right text-xl font-medium col-span-3">
-              {userData.email ? (
-                userData.email
-              ) : (
-                <div className="h-0">
-                  <CustomInput
-                    value={inputData.email}
-                    placeholder="Ingrese el email"
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* row 5 */}
-            <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-              telefono
-            </div>
-            <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-              {userData.phoneNumber ? (
-                userData.phoneNumber
-              ) : (
-                <div className="h-0">
-                  <CustomInput
-                    value={inputData.phoneNumber}
-                    placeholder="Ingrese el teléfono"
-                    onChange={(e) =>
-                      handleInputChange("phoneNumber", e.target.value)
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="md:w-1/2  md:justify-center  md:items-center md:text-center md:mx-auto">
-           <div className="grid grid-cols-2 gap-4 w-full mt-10">
-              <div className="flex justify-center items-center">
-                <Button
-                  text="Cargar Imagen"
-                  textColor={"text-inputBorder"}
-                  withBorder={true}
-                  borderColor="border-inputBorder"
-                  font="font-normal"
-                  bgColor="bg-gray-600"
-                  disabled={false}
-                />
+          ) : (
+            <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
+              {/* row 1 */}
+              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
+                usuario
               </div>
-              <div className="mx-auto w-20 h-20 ">
-                {user?.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt="Foto de perfil"
-                   className="w-full h-full object-cover rounded-full"
-                  />
+              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
+                {userData.username ? (
+                  userData.username
+                ) : (
+                  <div className="h-0">
+                    <CustomInput
+                      value={inputData.username}
+                      placeholder="Ingrese el usuario"
+                      onChange={(e) =>
+                        handleInputChange("username", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* row 2 */}
+              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
+                nombre
+              </div>
+              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
+                {userData.firstName ? (
+                  userData.firstName
+                ) : (
+                  <div className="h-0">
+                    <CustomInput
+                      value={inputData.firstName}
+                      placeholder="Ingrese el nombre"
+                      onChange={(e) =>
+                        handleInputChange("firstName", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* row 3 */}
+              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
+                Apellido
+              </div>
+              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
+                {userData.lastName ? (
+                  userData.lastName
+                ) : (
+                  <div className="h-0">
+                    <CustomInput
+                      value={inputData.lastName}
+                      placeholder="Ingrese el apellido"
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* row 4 */}
+              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-1 uppercase">
+                email
+              </div>
+              <div className="bg-blue-500 text-right text-xl font-medium col-span-3">
+                {userData.email ? (
+                  userData.email
+                ) : (
+                  <div className="h-0">
+                    <CustomInput
+                      value={inputData.email}
+                      placeholder="Ingrese el email"
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* row 5 */}
+              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
+                telefono
+              </div>
+              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
+                {userData.phoneNumber ? (
+                  userData.phoneNumber
+                ) : (
+                  <div className="h-0">
+                    <CustomInput
+                      value={inputData.phoneNumber}
+                      placeholder="Ingrese el teléfono"
+                      onChange={(e) =>
+                        handleInputChange("phoneNumber", e.target.value)
+                      }
+                    />
+                  </div>
                 )}
               </div>
             </div>
+          )}
+          {!isLoading && (
+            <div className="md:w-1/2  md:justify-center  md:items-center md:text-center md:mx-auto">
+              <div className="grid grid-cols-2 gap-4 w-full mt-10">
+                <div className="flex justify-center items-center">
+                  <Button
+                    text="Cargar Imagen"
+                    textColor={"text-inputBorder"}
+                    withBorder={true}
+                    borderColor="border-inputBorder"
+                    font="font-normal"
+                    bgColor="bg-gray-600"
+                    disabled={false}
+                  />
+                </div>
+                <div className="mx-auto w-20 h-20 ">
+                  {user?.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="Foto de perfil"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full mr-4 border-inputs border-[1px] flex items-center justify-center">
+                      <UserIcon />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        {!isLoading && (
+          <div className="md:w-80 w-full mt-10 md:mt-14">
+            <Button
+              text="Guardar"
+              textTransform="uppercase"
+              textSize="text-[25px]"
+              textColor="text-backgroundcolor"
+              bgColor="bg-secondary"
+              roundedSize="rounded-[30px]"
+              disabled={false}
+              onClick={saveUserData}
+            />
           </div>
-        </div>
-        <div className="md:w-80 w-full mt-10 md:mt-14">
-          <Button
-            text="Guardar"
-            textTransform="uppercase"
-            textSize="text-[25px]"
-            textColor="text-backgroundcolor"
-            bgColor="bg-secondary"
-            roundedSize="rounded-[30px]"
-            disabled={false}
-            onClick={saveUserData}
-          />
-        </div>
+        )}
       </Layout>
     </div>
   );

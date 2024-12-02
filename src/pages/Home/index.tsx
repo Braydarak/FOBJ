@@ -31,6 +31,8 @@ const Home: React.FC = () => {
   const getFirstName = (fullName: string) => {
     return fullName.split(" ")[0];
   };
+ 
+
 
   return (
     <div className="overflow-x-hidden w-full flex flex-col h-full justify-between items-stretch">
@@ -56,7 +58,7 @@ const Home: React.FC = () => {
                 className="w-10 h-10 rounded-full mr-4 border-inputs border-[1px]"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full mr-4 border-inputs border-[1px]">
+              <div className="w-10 h-10 rounded-full mr-4 border-inputs border-[1px] flex items-center justify-center">
                 <UserIcon />
               </div>
             )}
