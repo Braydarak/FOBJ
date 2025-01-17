@@ -13,6 +13,8 @@ import ConfigPage from "./pages/config";
 import ReportPage from "./pages/report";
 import Register from "./pages/login/register";
 import CardDetailsView from "./pages/search/cardDetailsView";
+import MyObjects from "./pages/myobjects";
+import CardDetailsUser from "./pages/myobjects/cardDetailsUser";
 
 const App: React.FC = () => {
   return (
@@ -28,6 +30,8 @@ const App: React.FC = () => {
             <Route path="/report" element={<ReportPage />} />
             <Route path="/Register" element={<Register />} />
             <Route path="/cardDetailsView/:id" element={<CardDetailsView />} />
+            <Route path="/myObjects" element={<MyObjects />} />
+            <Route path="/cardDetailsUser/:collectionName/:itemid" element={<CardDetailsUser />} />
           </Routes>
         </AuthProvider>
       </Provider>

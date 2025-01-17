@@ -14,6 +14,7 @@ import CustomInput from "../../components/customInput";
 import ErrorComponent from "../../components/error";
 import Loader from "../../components/loader";
 import ArrowIcon from "../../icons/arrowIcon/arrowIcon";
+import { getObjectCardTitles } from "../../utils/objectCardTitles";
 
 const Search: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -109,48 +110,8 @@ const Search: React.FC = () => {
     }
   };
   const hasResults = collectionData[selectedOption]?.length > 0;
-
-  // Define los títulos para cada tipo de objeto
-  const getObjectCardTitles = () => {
-    switch (selectedOption) {
-      case "Cash":
-        return {
-          top: "Cantidad",
-          middle: "Localidad",
-          bottom: "Fecha",
-        };
-      case "Clothing":
-        return {
-          top: "Marca",
-          middle: "Descripción",
-          bottom: "Fecha",
-        };
-      case "Dni":
-        return {
-          top: "Dni",
-          middle: "Nombre",
-          bottom: "Fecha",
-        };
-      case "Phone":
-        return {
-          top: "Marca",
-          middle: "Color",
-          bottom: "Fecha",
-        };
-      case "Other":
-        return {
-          top: "Descripción",
-          middle: "Fecha",
-          bottom: "",
-        };
-      default:
-        return {
-          top: "",
-          middle: "",
-          bottom: "",
-        };
-    }
-  };
+  const cardTitles = getObjectCardTitles(selectedOption);
+ 
 
   return (
     <>
@@ -217,21 +178,21 @@ const Search: React.FC = () => {
                   .map((item: any, index: number) => (
                     <ObjectCard
                       key={index}
-                      objectTop={getObjectCardTitles().top}
+                      objectTop={cardTitles.top}
                       dataTop={
                         item.documentNumber ||
                         item.amount ||
                         item.model ||
                         item.brand
                       }
-                      objectMiddle={getObjectCardTitles().middle}
+                      objectMiddle={cardTitles.middle}
                       dataMiddle={
                         item.name ||
                         item.location ||
                         item.description ||
                         item.color
                       }
-                      objectBottom={getObjectCardTitles().bottom}
+                      objectBottom={cardTitles.bottom}
                       dataBottom={item.date}
                       address={item.map}
                       coordinates={item.coordinates && item.coordinates.length === 2
