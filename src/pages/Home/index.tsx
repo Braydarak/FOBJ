@@ -15,6 +15,7 @@ const Home: React.FC = () => {
 
   const searchNavigator = () => navigate("/search");
   const reportNavigator = () => navigate("/report");
+  const objectsNavigator = () => navigate("/myobjects")
 
   const handleLogout = async () => {
     await logout();
@@ -90,9 +91,9 @@ const Home: React.FC = () => {
           </span>
           <span
             className="text-secondary md:text-[25px] text-xs hover:cursor-pointer hover:underline"
-            onClick={searchNavigator}
+            onClick={objectsNavigator}
           >
-            Buscar
+            Mis objetos
           </span>
         </div>
 
