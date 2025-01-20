@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/header";
 import Layout from "../../components/layout";
 import Button from "../../components/customButton";
 import LineComponent from "../../components/lineComponent";
 import Dropdown from "../../components/dropdown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Option } from "../../components/dropdown/types";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCollectionData } from "../../reducers/actions/objectActions";
@@ -22,6 +22,8 @@ const Search: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [visibleCount, setVisibleCount] = useState<number>(20);
+  const location = useLocation();
+  
 
   const dispatch: AppDispatch = useDispatch();
   const collectionData = useSelector(
@@ -30,6 +32,15 @@ const Search: React.FC = () => {
 
   const error = useSelector((state: RootState) => state.objects.error);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const collectionFromUrl = queryParams.get("collection");
+    if (collectionFromUrl) {
+      setSelectedOption(collectionFromUrl);
+    }
+  }, [location]);
+
 
   const handleDropdownChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -109,6 +120,8 @@ const Search: React.FC = () => {
         return "";
     }
   };
+
+
   const hasResults = collectionData[selectedOption]?.length > 0;
   const cardTitles = getObjectCardTitles(selectedOption);
  

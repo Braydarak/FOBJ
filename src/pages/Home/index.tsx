@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Layout from "../../components/layout";
 import Header from "../../components/header";
 import LogOutIcon from "../../icons/logOutIcon";
@@ -8,10 +8,23 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import Loader from "../../components/loader";
 import UserIcon from "../../components/userIcon";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+import firebaseConfig from "../../firebase";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { logout, loading, user } = useAuth();
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const [loadingCounts, setLoadingCounts] = useState(true);
+  const [counts, setCounts] = useState({
+    dni: 0,
+    clothing: 0,
+    cash: 0,
+    phone: 0,
+    other: 0,
+  });
 
   const searchNavigator = () => navigate("/search");
   const reportNavigator = () => navigate("/report");
@@ -22,7 +35,39 @@ const Home: React.FC = () => {
     navigate("/");
   };
 
-  if (loading)
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const dniCount = await getCollectionCount("Dni");
+        const ropaCount = await getCollectionCount("Clothing");
+        const dineroCount = await getCollectionCount("Cash");
+        const telCount = await getCollectionCount("Phone");
+        const otrosCount = await getCollectionCount("Other");
+
+
+        setCounts({
+          dni: dniCount,
+          clothing: ropaCount,
+          cash: dineroCount,
+          phone: telCount,
+          other: otrosCount,
+        });
+        setLoadingCounts(false);
+      } catch (error) {
+        console.error("Error fetching collection counts:", error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const getCollectionCount = async (collectionName: string): Promise<number> => {
+    const collectionRef = collection(db, collectionName); 
+    const snapshot = await getDocs(collectionRef);
+    return snapshot.size;
+  };
+
+  if (loading || loadingCounts)
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader />
@@ -99,10 +144,11 @@ const Home: React.FC = () => {
 
         <div className="flex justify-around items-center w-full md:mt-10 overflow-x-auto md:overflow-hidden">
           <div className="flex justify-center items-center md:w-full gap-3 p-2 md:justify-around md:gap-0">
-            <Card title={"Dni"} obj={"dni"} amount={120} />
-            <Card title={"Ropa"} obj={"ropa"} amount={120} />
-            <Card title={"Dinero"} obj={"dinero"} amount={120} />
-            <Card title={"Telefono"} obj={"tel"} amount={120} />
+            <Card title={"Dni"} obj={"dni"} amount={counts.dni} onClick={() => navigate(`/search?collection=Dni`)} />
+            <Card title={"Ropa"} obj={"ropa"} amount={counts.clothing} onClick={() => navigate(`/search?collection=Clothing`)} />
+            <Card title={"Dinero"} obj={"dinero"} amount={counts.cash} onClick={() => navigate(`/search?collection=Cash`)} />
+            <Card title={"Teléfono"} obj={"tel"} amount={counts.phone} onClick={() => navigate(`/search?collection=Phone`)}/>
+            <Card title={"Otros"} obj={"otros"} amount={counts.other} onClick={() => navigate(`/search?collection=Other`)}/>
           </div>
         </div>
       </Layout>

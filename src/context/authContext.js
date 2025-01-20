@@ -81,7 +81,6 @@ export function AuthProvider({ children }) {
     const result = await signInWithPopup(auth, GoogleProvider);
     const user = result.user;
 
-    console.log("Datos del usuario autenticado con Google:", user);
 
     const hasAdditionalData = await checkUserAdditionalData(user.uid);
     if (hasAdditionalData) {
