@@ -22,7 +22,7 @@ const CardDetailsView: React.FC = () => {
           if (docSnap.exists()) {
             setCardDetails(docSnap.data()); // Guardamos los datos en el estado
           } else {
-            console.log("No existe ese documento");
+            console.log("not found!");
           }
         } catch (error) {
           console.error("Error al obtener los detalles de la tarjeta:", error);
