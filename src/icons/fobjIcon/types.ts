@@ -4,5 +4,6 @@ export type FobjIconProps = {
   size?: string;
   height?: string;
   onClick?: () => void;
+  disablePointer?: boolean;
   };
   
