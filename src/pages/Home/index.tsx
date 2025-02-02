@@ -6,7 +6,7 @@ import Card from "../../components/cards";
 import LineComponent from "../../components/lineComponent";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-import Loader from "../../components/loader";
+import FobjIcon from "../../icons/fobjIcon";
 import UserIcon from "../../components/userIcon";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
@@ -67,12 +67,7 @@ const Home: React.FC = () => {
     return snapshot.size;
   };
 
-  if (loading || loadingCounts)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader />
-      </div>
-    );
+ 
 
   const getFirstName = (fullName: string) => {
     return fullName.split(" ")[0];
@@ -83,6 +78,13 @@ const Home: React.FC = () => {
   return (
     <div className="overflow-x-hidden w-full flex flex-col h-full justify-between items-stretch">
       <Header />
+      {loading || loadingCounts ? (
+         <div className="flex items-center justify-center h-screen">
+         <div className="animate-spin " style={{ animationDuration: "2s" }}>
+           <FobjIcon color={"#001F54"} size="150" height="150" disablePointer={true} />
+         </div>
+       </div>
+      ) : (
       <Layout>
         <div className="text-white flex justify-between items-center w-full mt-3 md:mt-5 mb-3 md:mb-5">
           <div className="flex flex-col">
@@ -152,6 +154,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </Layout>
+      )}
     </div>
   );
 };

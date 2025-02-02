@@ -8,7 +8,7 @@ import Button from "../../components/customButton";
 import CustomInput from "../../components/customInput";
 import { useAuth } from "../../context/authContext";
 import UserIcon from "../../components/userIcon";
-import Loader from "../../components/loader";
+import FobjIcon from "../../icons/fobjIcon";
 
 const ConfigPage: React.FC = () => {
   const { user } = useAuth();
@@ -138,9 +138,11 @@ const ConfigPage: React.FC = () => {
         </h3>
         <div className={`w-full md:grid ${isLoading ? '' : 'md:grid-cols-2'}`}>
           {isLoading ? (
-            <div className="flex justify-center items-center h-full w-full mt-10">
-              <Loader width="w-[80px]" height="h-[80px]" />
-            </div>
+             <div className="flex items-center justify-center mt-20">
+             <div className="animate-spin " style={{ animationDuration: "2s" }}>
+               <FobjIcon color={"#001F54"} size="150" height="150" disablePointer={true} />
+             </div>
+           </div>
           ) : (
             <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
               {/* row 1 */}

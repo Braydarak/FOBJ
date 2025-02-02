@@ -6,8 +6,8 @@ import { useAuth } from "../../context/authContext";
 import { firestore } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { getObjectCardTitles } from "../../utils/objectCardTitles";
-import Loader from "../../components/loader";
 import { useNavigate } from "react-router-dom";
+import FobjIcon from "../../icons/fobjIcon";
 
 const MyObject: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -66,14 +66,7 @@ const MyObject: React.FC = () => {
     }
   }, [user]);
 
-  // Comprobar si aún estamos cargando
-  if (authLoading || isLoading) {
-    return (
-      <div className="flex items-center justify-center w-full h-screen">
-        <Loader height="h-[70px]" width="w-[70px]" />
-      </div>
-    );
-  }
+ 
   const translations: Record<string, string> = {
     Cash: "Dinero",
     Clothing: "Ropa",
@@ -81,28 +74,59 @@ const MyObject: React.FC = () => {
     Dni: "Dni",
     Other: "Otros",
   };
+  const hasObjects = Object.keys(objects).some(
+    (collection) => objects[collection].data.length > 0
+  );
   return (
     <div>
       <Header />
       <Layout>
-        <div className="flex flex-col items-center w-full mb-36 md:mb-0">
-          <p className="font-semibold text-lg mt-12 md:text-[40px] md:text-left md:mb-4 w-full uppercase">
-            Mis Objetos
-          </p>
-          {Object.keys(objects).map((collection: string) => {
-            return objects[collection].data.map((item: any) => {
-              return (
-                <ObjectBar
-                  key={item.id}
-                  objectTop={translations[collection] || collection}
-                  address={item.map || ""}
-                  coordinates={item.coordinates}
-                  onClick={() => cardDetailsUser(collection, item.id)}
-                />
-              );
-            });
-          })}
-        </div>
+        {authLoading || isLoading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="animate-spin " style={{ animationDuration: "2s" }}>
+              <FobjIcon
+                color={"#001F54"}
+                size="150"
+                height="150"
+                disablePointer={true}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center w-full mb-36 md:mb-0">
+            <p className="font-semibold text-lg mt-12 md:text-[40px] md:text-left md:mb-4 w-full uppercase">
+              Mis Objetos
+            </p>
+
+            {hasObjects ? (
+              Object.keys(objects).map((collection: string) => {
+                return objects[collection].data.map((item: any) => {
+                  return (
+                    <ObjectBar
+                      key={item.id}
+                      objectTop={translations[collection] || collection}
+                      address={item.map || ""}
+                      coordinates={item.coordinates}
+                      onClick={() => cardDetailsUser(collection, item.id)}
+                    />
+                  );
+                });
+              })
+            ) : (
+              <div className="text-center mt-8">
+                <p className="text-gray-600 text-lg">
+                  No se encontraron objetos.
+                </p>
+                <p
+                  onClick={() => navigate("/home")}
+                  className="text-secondary mt-4 text-xl font-bold cursor-pointer underline"
+                >
+                  Volver
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </Layout>
     </div>
   );
