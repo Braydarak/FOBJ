@@ -139,6 +139,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   ];
 
   const otherFieldsConfig = [
+    { key: "title", label: "Titulo", placeholder:"Ej: Llaves, Valija, etc.." },
     { key: "description", label: "Descripción del objeto encontrado" },
     { key: "date", label: "Fecha", type: "date" },
   ];

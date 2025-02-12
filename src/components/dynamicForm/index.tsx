@@ -27,7 +27,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
           }
           value={inputs[field.key] || ""}
           onChange={(e) => onInputChange(field.key, e.target.value)}
-          placeholder={field.key === "map" ? "Seleccionar direccion en el mapa..." : undefined}
+          placeholder={ field.placeholder
+            ? field.placeholder
+            : field.key === "map"
+            ? "Seleccionar direccion en el mapa..."
+            : undefined}
           readOnly={field.key === "map" ? ReadOnly : undefined}
         />
       ))}

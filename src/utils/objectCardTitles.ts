@@ -26,9 +26,9 @@ export const getObjectCardTitles = (selectedOption: string) => {
         };
       case "Other":
         return {
-          top: "Descripción",
-          middle: "Fecha",
-          bottom: "",
+          top: "Titulo",
+          middle: "Descripción",
+          bottom: "Fecha",
         };
       default:
         return {

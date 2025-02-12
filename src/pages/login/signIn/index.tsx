@@ -5,7 +5,6 @@ import LogoCircle from "../../../components/logoCircle";
 import GoogleIcon from "../../../icons/googleIcon/googleIcon";
 import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
 import LoginImg from "../../../assets/webp/login-img.webp";
-import AppleIcon from "../../../icons/appleIcon/appleIcon";
 import ErrorComponent from "../../../components/error";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/authContext";
@@ -85,23 +84,8 @@ const SignIn: React.FC = () => {
       setIsLoggingInWithFacebook(false);
       navigate("/home");
     } catch (error: any) {
-      console.error("Error during Facebook login:", error); 
-      let errorMessage = "No se pudo iniciar sesión con Facebook";
-      if (error.code) {
-        switch (error.code) {
-          case "auth/account-exists-with-different-credential":
-            errorMessage = "Ya existe una cuenta con esta dirección de correo electrónico. (Google)";
-            break;
-          case "auth/cancelled-popup-request":
-          case "auth/popup-closed-by-user":
-            errorMessage = "La ventana emergente de inicio de sesión se cerró antes de completarse.";
-            break;
-          
-          default:
-            errorMessage = "Ocurrió un error inesperado durante el inicio de sesión con Facebook.";
-        }
-      }
-      setError(errorMessage);
+      console.error("Error during Facebook login:", error);
+      setError(error.message); // Muestra el mensaje de error al usuario
       setIsLoggingInWithFacebook(false);
     }
   };
@@ -190,7 +174,6 @@ const SignIn: React.FC = () => {
               logoComponent={<GoogleIcon />}
               onClick={handleGoogleSignIn}
             />
-            <LogoCircle logoComponent={<AppleIcon />} />
             <LogoCircle logoComponent={<FacebookIcon />} onClick={handleFacebookLogin} />
           </div>
           <div className="w-full flex justify-center items-center text-base md:text-xl">
