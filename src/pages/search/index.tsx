@@ -23,7 +23,6 @@ const Search: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [visibleCount, setVisibleCount] = useState<number>(20);
   const location = useLocation();
-  
 
   const dispatch: AppDispatch = useDispatch();
   const collectionData = useSelector(
@@ -40,7 +39,6 @@ const Search: React.FC = () => {
       setSelectedOption(collectionFromUrl);
     }
   }, [location]);
-
 
   const handleDropdownChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -62,7 +60,7 @@ const Search: React.FC = () => {
       setErrorMessage(null);
       try {
         await dispatch(fetchCollectionData(selectedOption, inputValue));
-        
+
         setVisibleCount(20);
       } catch (error) {
         setErrorMessage(
@@ -79,10 +77,8 @@ const Search: React.FC = () => {
   const handleCardClick = (item: any) => {
     if (item.coordinates && item.coordinates.length === 2) {
       const [latitude, longitude] = item.coordinates;
-      
+
       if (latitude !== undefined && longitude !== undefined) {
-       
-        
         navigate(`/cardDetailsView/${item.id}`, {
           state: { cardId: item.id, collectionName: selectedOption },
         });
@@ -90,10 +86,13 @@ const Search: React.FC = () => {
         console.warn("Coordenadas no disponibles para el item:", item);
       }
     } else {
-      console.warn("Coordenadas no disponibles o incorrectas para el item:", item);
+      console.warn(
+        "Coordenadas no disponibles o incorrectas para el item:",
+        item
+      );
     }
   };
-  
+
   const dropdownOptions = {
     placeholder: "Seleccione una opción",
     items: [
@@ -121,10 +120,14 @@ const Search: React.FC = () => {
     }
   };
 
+  // Función auxiliar para recortat el texto
+  const truncateString = (text: string | undefined): string => {
+    if (!text) return "";
+    return text.length > 15 ? text.substring(0, 15) + ".." : text;
+  };
 
   const hasResults = collectionData[selectedOption]?.length > 0;
   const cardTitles = getObjectCardTitles(selectedOption);
- 
 
   return (
     <>
@@ -192,25 +195,28 @@ const Search: React.FC = () => {
                     <ObjectCard
                       key={index}
                       objectTop={cardTitles.top}
-                      dataTop={
+                      dataTop={truncateString(
                         item.documentNumber ||
                         item.amount ||
                         item.model ||
-                        item.brand
-                      }
+                        item.brand ||
+                        item.title
+                  )}
                       objectMiddle={cardTitles.middle}
-                      dataMiddle={
+                      dataMiddle={truncateString(
                         item.name ||
                         item.location ||
                         item.description ||
                         item.color
-                      }
+                  )}
                       objectBottom={cardTitles.bottom}
                       dataBottom={item.date}
                       address={item.map}
-                      coordinates={item.coordinates && item.coordinates.length === 2
-                        ? [item.coordinates[0], item.coordinates[1]]
-                        : [undefined, undefined]}
+                      coordinates={
+                        item.coordinates && item.coordinates.length === 2
+                          ? [item.coordinates[0], item.coordinates[1]]
+                          : [undefined, undefined]
+                      }
                       onClick={() => handleCardClick(item)}
                     />
                   ))}

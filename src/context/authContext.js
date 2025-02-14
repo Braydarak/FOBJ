@@ -7,7 +7,8 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { auth, firestore } from "../firebase";
 import { getDocs, getDoc, query, where, collection, setDoc, doc } from "firebase/firestore";
@@ -92,13 +93,53 @@ export function AuthProvider({ children }) {
 
 
   //FacebookAhut
-  const loginWithFacebook = () => {
+  const loginWithFacebook = async () => {
     const FacebookProvider = new FacebookAuthProvider();
     FacebookProvider.addScope('email');
     FacebookProvider.setCustomParameters({
       display: 'popup',
     });
-    return signInWithPopup(auth, FacebookProvider);
+    
+    try {
+      const result = await signInWithPopup(auth, FacebookProvider);
+      const user = result.user;
+
+      const hasAdditionalData = await checkUserAdditionalData(user.uid);
+      if (hasAdditionalData) {
+        navigate("/home");
+      } else {
+        navigate("/config");
+      }
+    } catch (error) {
+      console.error("Error during Facebook login:", error);
+
+      if (error.code === "auth/account-exists-with-different-credential") {
+        const email = error.customData?.email;
+        if (email) {
+          const providers = await fetchSignInMethodsForEmail(auth, email);
+          if (providers.includes("google.com")) {
+            throw new Error(
+              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con Google."
+            );
+          } else if (providers.includes("password")) {
+            throw new Error(
+              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con correo electrónico y contraseña."
+            );
+          }
+        }
+      } else if (
+        error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        throw new Error(
+          "La ventana emergente de inicio de sesión se cerró antes de completarse."
+        );
+      } else {
+        throw new Error(
+          "Ocurrió un error inesperado durante el inicio de sesión con Facebook."
+        );
+      }
+    }
   };
 
   useEffect(() => {
