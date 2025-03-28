@@ -15,6 +15,8 @@ import Register from "./pages/login/register";
 import CardDetailsView from "./pages/search/cardDetailsView";
 import MyObjects from "./pages/myobjects";
 import CardDetailsUser from "./pages/myobjects/cardDetailsUser";
+import Chat from "./pages/chat";
+import NotificationsPage from "./pages/notification";
 
 const App: React.FC = () => {
   return (
@@ -32,6 +34,8 @@ const App: React.FC = () => {
             <Route path="/cardDetailsView/:id" element={<CardDetailsView />} />
             <Route path="/myObjects" element={<MyObjects />} />
             <Route path="/cardDetailsUser/:collectionName/:itemid" element={<CardDetailsUser />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/Notifications" element={<NotificationsPage />} />
           </Routes>
         </AuthProvider>
       </Provider>
