@@ -47,7 +47,7 @@ const Register: React.FC = () => {
 
     // Validación para campos obligatorios
   for (const key in user) {
-    if (user[key as keyof typeof user].trim() === "") {
+    if (key !== "phoneNumber" && user[key as keyof typeof user].trim() === "") {
       setError("Todos los campos son obligatorios.");
       return;
     }
@@ -78,7 +78,7 @@ const Register: React.FC = () => {
         firstName: user.firstName,
         lastName: user.lastName,
         city: user.city,
-        phoneNumber: user.phoneNumber,
+        phoneNumber: user.phoneNumber || "",
       });
       setVerified("Te registraste correctamente. Redirigiendo...");
       setTimeout(() => {

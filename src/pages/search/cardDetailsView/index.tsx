@@ -7,21 +7,27 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { firestore } from "../../../firebase";
+import { useAuth } from "../../../context/authContext";
 import Header from "../../../components/header";
 import Layout from "../../../components/layout";
 import Map from "../../../components/map/index";
 import Button from "../../../components/customButton";
 import FobjIcon from "../../../icons/fobjIcon";
 import { renderDetails } from "./renderDetails";
+import { useNavigate } from "react-router-dom";
 
 const CardDetailsView: React.FC = () => {
   const location = useLocation();
-  const { cardId, collectionName } = location.state || {};
+  const { cardId, collectionName, userEmail } = location.state || {};
   const [cardDetails, setCardDetails] = useState<any>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchCardAndUserDetails = async () => {
@@ -36,7 +42,6 @@ const CardDetailsView: React.FC = () => {
             setCardDetails(cardData);
 
             if (cardData.userId) {
-              // En lugar de usar userId como ID de documento, lo tratamos como un correo
               const userRef = query(
                 collection(firestore, "users"),
                 where("email", "==", cardData.userId) // Buscamos por el correo
@@ -63,6 +68,73 @@ const CardDetailsView: React.FC = () => {
 
     fetchCardAndUserDetails();
   }, [cardId, collectionName]);
+
+  const handleContactClick = async () => {
+    const currentUserEmail = user?.email;
+    const reportedUserEmail = userDetails?.email;
+
+    if (!currentUserEmail || !reportedUserEmail) {
+      console.error("Faltan datos de correo.");
+      return;
+    }
+
+    if (currentUserEmail === reportedUserEmail) {
+      alert("No puedes chatear contigo mismo.");
+      return;
+    }
+
+    // Mapeo de collectionName a títulos en español
+    const collectionToTitle: Record<string, string> = {
+      Cash: "Dinero",
+      Clothing: "Indumentaria",
+      Dni: "DNI",
+      Phone: "Telefono",
+      Other: "Otros",
+    };
+
+    const chatTitle = collectionToTitle[collectionName] || "Objeto";
+
+    // Generar chatId único (sin incluir el cardId si no es necesario)
+    const chatId = [currentUserEmail, reportedUserEmail].sort().join("_");
+
+    try {
+      const chatRef = doc(firestore, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+
+      if (!chatSnap.exists()) {
+       
+        await setDoc(chatRef, {
+          participants: [currentUserEmail, reportedUserEmail],
+          createdAt: serverTimestamp(),
+          objectId: cardId,
+          title: chatTitle,
+          lastMessage: "Mensaje de bienvenida",
+          lastMessageTime: serverTimestamp(),
+        });
+
+       
+        const messagesRef = collection(firestore, "chats", chatId, "messages");
+        await setDoc(doc(messagesRef), {
+          sender: "FOBJ",
+          text: `¡Bienvenido al chat sobre su ${chatTitle}!\n\nRecomendaciones de seguridad:\n• Confirme que el objeto coincide con su pérdida\n• Coordine encuentros en lugares públicos\n• Evite compartir información sensible`,
+          createdAt: serverTimestamp(), 
+          read: true,
+          isSystem: true, 
+          type: "system_notice",
+          preventNotification: true,
+        });
+      }
+
+      navigate("/chat", {
+        state: {
+          chatId,
+          userDetails,
+        },
+      });
+    } catch (error) {
+      console.error("Error al crear el chat:", error);
+    }
+  };
 
   const coordinates = cardDetails?.coordinates;
 
@@ -125,13 +197,13 @@ const CardDetailsView: React.FC = () => {
             </div>
             <div className="md:w-80 w-full mt-10 md:mt-14">
               <Button
-                text="Contactar"
+                text="Chatear"
                 textTransform="uppercase"
                 textSize="text-[25px]"
                 textColor="text-backgroundcolor"
                 bgColor="bg-secondary"
                 roundedSize="rounded-[30px]"
-                
+                onClick={handleContactClick}
                 disabled={false}
               />
             </div>
