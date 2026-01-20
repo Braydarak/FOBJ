@@ -33,7 +33,6 @@ const CardDetailsView: React.FC = () => {
     const fetchCardAndUserDetails = async () => {
       if (cardId && collectionName) {
         try {
-          // Obtener los detalles de la tarjeta
           const docRef = doc(firestore, collectionName, cardId);
           const docSnap = await getDoc(docRef);
 
@@ -44,7 +43,7 @@ const CardDetailsView: React.FC = () => {
             if (cardData.userId) {
               const userRef = query(
                 collection(firestore, "users"),
-                where("email", "==", cardData.userId) // Buscamos por el correo
+                where("email", "==", cardData.userId) 
               );
               const userSnap = await getDocs(userRef);
 
@@ -94,32 +93,35 @@ const CardDetailsView: React.FC = () => {
 
     const chatTitle = collectionToTitle[collectionName] || "Objeto";
 
-    // Generar chatId único (sin incluir el cardId si no es necesario)
-    const chatId = [currentUserEmail, reportedUserEmail].sort().join("_");
+    // Generar chatId único
+    const sortedEmails = [currentUserEmail, reportedUserEmail].sort();
+    const chatId = `${sortedEmails.join()}_${cardId}`;
 
     try {
       const chatRef = doc(firestore, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
 
       if (!chatSnap.exists()) {
-       
+    
+
         await setDoc(chatRef, {
-          participants: [currentUserEmail, reportedUserEmail],
+          participants: sortedEmails,
           createdAt: serverTimestamp(),
           objectId: cardId,
-          title: chatTitle,
+          title: `${chatTitle} - ${cardDetails?.title}`,
           lastMessage: "Mensaje de bienvenida",
           lastMessageTime: serverTimestamp(),
+          isAboutObject: true,
+          map: cardDetails?.map?.replace(/^-|\d+/g, '').replace(/\s{2,}/g, ' ').trim(),
         });
 
-       
         const messagesRef = collection(firestore, "chats", chatId, "messages");
         await setDoc(doc(messagesRef), {
           sender: "FOBJ",
           text: `¡Bienvenido al chat sobre su ${chatTitle}!\n\nRecomendaciones de seguridad:\n• Confirme que el objeto coincide con su pérdida\n• Coordine encuentros en lugares públicos\n• Evite compartir información sensible`,
-          createdAt: serverTimestamp(), 
+          createdAt: serverTimestamp(),
           read: true,
-          isSystem: true, 
+          isSystem: true,
           type: "system_notice",
           preventNotification: true,
         });
@@ -129,6 +131,7 @@ const CardDetailsView: React.FC = () => {
         state: {
           chatId,
           userDetails,
+          objectTitle: cardDetails?.title,
         },
       });
     } catch (error) {

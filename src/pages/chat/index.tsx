@@ -12,13 +12,16 @@ import {
   getDocs,
   doc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import FobjIcon from "../../icons/fobjIcon";
 import { useAuth } from "../../context/authContext";
+import { useDispatch } from "react-redux";
+
 
 const Chat = () => {
   const location = useLocation();
-  const { chatId, userDetails} = location.state || {};
+  const { chatId, userDetails } = location.state || {};
   const { user } = useAuth();
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<
@@ -26,8 +29,8 @@ const Chat = () => {
   >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  
   const getUsernameByEmail = async (email: string) => {
     try {
       const usersRef = collection(db, "users");
@@ -39,17 +42,17 @@ const Chat = () => {
         return userDoc.data().username; // Retorna el username
       } else {
         console.error("No se encontró el usuario en Firestore.");
-        return email; 
+        return email;
       }
     } catch (error) {
       console.error("Error al obtener el username:", error);
-      return email; 
+      return email;
     }
   };
 
   const deleteMessage = async (messageId: string) => {
     if (!chatId || !messageId) return;
-    
+
     try {
       const messageRef = doc(db, "chats", chatId, "messages", messageId);
       await deleteDoc(messageRef);
@@ -89,28 +92,62 @@ const Chat = () => {
     }
   }, [chatId, user]);
 
+  useEffect(() => {
+    if (!user || !chatId) return;
+
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const unreadQuery = query(
+      messagesRef,
+      where("senderEmail", "!=", user.email),
+      where("read", "==", false)
+    );
+
+    const unsubscribe = onSnapshot(unreadQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        // Si hay mensajes no leídos, los marca como leídos
+        snapshot.docs.forEach(async (messagedoc) => {
+          const messageRef = doc(
+            db,
+            "chats",
+            chatId,
+            "messages",
+            messagedoc.id
+          );
+          await updateDoc(messageRef, { read: true });
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [chatId, user, dispatch]);
+
   // Enviar mensaje a Firestore
   const sendMessage = async () => {
-    if (message.trim() && chatId && user) {
+    if (message.trim() && chatId && user && userDetails) {
       try {
         const senderUsername = await getUsernameByEmail(user.email);
         const messagesRef = collection(db, "chats", chatId, "messages");
+        const otherUserEmail = userDetails.email;
 
         // Enviar mensaje
         await addDoc(messagesRef, {
           text: message,
           sender: senderUsername,
           senderEmail: user.email,
+          recipientEmail: otherUserEmail,
           read: false,
           createdAt: serverTimestamp(),
         });
 
-        
         setMessage("");
       } catch (error) {
         console.error("Error al enviar el mensaje:", error);
         alert("Hubo un error al enviar el mensaje. Inténtalo de nuevo.");
       }
+    } else {
+      console.error(
+        "No se pueden enviar mensajes: faltan datos del usuario o del chat."
+      );
     }
   };
 
@@ -131,7 +168,7 @@ const Chat = () => {
             onClick={() => navigate("/home")}
           />
           <div className="w-10 h-10 rounded-full flex justify-center items-center bg-secondary text-white">
-          {userDetails?.username || "U"}
+            {userDetails?.username || "U"}
           </div>
         </div>
 
@@ -141,14 +178,12 @@ const Chat = () => {
             <div
               key={msg.id}
               className={`flex ${
-                msg.senderEmail === user.email ? "justify-end" : "justify-start" 
+                msg.senderEmail === user.email ? "justify-end" : "justify-start"
               }`}
             >
-              <div
-                className="p-2 rounded-lg shadow-md max-w-[80%] bg-secondary text-backgroundcolor" 
-              >
+              <div className="p-2 rounded-lg shadow-md max-w-[80%] bg-secondary text-backgroundcolor">
                 <p className="font-bold">
-                  {msg.senderEmail === user.email ? "Tu:" :`${msg.sender}:`}{" "}
+                  {msg.senderEmail === user.email ? "Tu:" : `${msg.sender}:`}{" "}
                 </p>
                 <p>{msg.text}</p>
                 {msg.senderEmail === user.email && (
@@ -165,8 +200,6 @@ const Chat = () => {
           ))}
           <div ref={messagesEndRef} />
         </div>
-
-        
 
         {/* Campo de entrada y botón */}
         <div className="p-4 border-t border-gray-300 flex items-center">
