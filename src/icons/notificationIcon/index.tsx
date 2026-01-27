@@ -11,7 +11,6 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({
       onClick();
     }
   };
-
   return (
     <svg
       className={className}

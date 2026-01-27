@@ -32,49 +32,55 @@ const ConfigPage: React.FC = () => {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  
   useEffect(() => {
+    const fetchGoogleUserData = async (uid: string) => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const { displayName, email, providerData } = currentUser;
+        const phoneNumber = providerData[0]?.phoneNumber || "";
+        const newUserData = {
+          username: displayName || "",
+          firstName: displayName?.split(" ")[0] || "",
+          lastName: displayName?.split(" ")[1] || "",
+          email: email || "",
+          phoneNumber,
+        };
+        setUserData(newUserData);
+        try {
+          await setDoc(doc(firestore, "users", uid), newUserData);
+        } catch (error) {
+          console.error("Error saving user data:", error);
+        }
+      }
+    };
+
+    const fetchUserData = async (uid: string) => {
+      setIsLoading(true);
+      try {
+        const userDoc = doc(firestore, "users", uid);
+        const userSnapshot = await getDoc(userDoc);
+        if (userSnapshot.exists()) {
+          setUserData(userSnapshot.data() as any);
+        } else {
+          await fetchGoogleUserData(uid);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (userId) {
       fetchUserData(userId);
     }
   }, [userId]);
 
-  const fetchUserData = async (uid: string) => {
-    setIsLoading(true);
-    const userDoc = doc(firestore, "users", uid);
-    const userSnapshot = await getDoc(userDoc);
+ 
 
-    if (userSnapshot.exists()) {
-      setUserData(userSnapshot.data() as any);
-    } else {
-      await fetchGoogleUserData();
-    }
-    setIsLoading(false);
-  };
-
-  const fetchGoogleUserData = async () => {
-    const user = auth.currentUser;
-
-    if (user && userId) {
-      const { displayName, email, providerData } = user;
-      const phoneNumber = providerData[0]?.phoneNumber || "";
-
-      const newUserData = {
-        username: displayName || "",
-        firstName: displayName?.split(" ")[0] || "",
-        lastName: displayName?.split(" ")[1] || "",
-        email: email || "",
-        phoneNumber,
-      };
-
-      setUserData(newUserData);
-
-      try {
-        await setDoc(doc(firestore, "users", userId), newUserData);
-      } catch (error) {
-        console.error("Error al guardar los datos en Firestore:", error);
-      }
-    }
-  };
+  
 
   const saveUserData = async () => {
     if (!userId) return;
@@ -136,13 +142,21 @@ const ConfigPage: React.FC = () => {
         <h3 className="text-2xl w-full font-semibold my-8 uppercase">
           configuración
         </h3>
-        <div className={`w-full md:grid ${isLoading ? '' : 'md:grid-cols-2'}`}>
+        <div className={`w-full md:grid ${isLoading ? "" : "md:grid-cols-2"}`}>
           {isLoading ? (
-             <div className="flex items-center justify-center mt-20">
-             <div className="animate-spin " style={{ animationDuration: "2s" }}>
-               <FobjIcon color={"#001F54"} size="150" height="150" disablePointer={true} />
-             </div>
-           </div>
+            <div className="flex items-center justify-center mt-20">
+              <div
+                className="animate-spin "
+                style={{ animationDuration: "2s" }}
+              >
+                <FobjIcon
+                  color={"#001F54"}
+                  size="150"
+                  height="150"
+                  disablePointer={true}
+                />
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
               {/* row 1 */}
