@@ -200,7 +200,6 @@ const Chat = () => {
           ))}
           <div ref={messagesEndRef} />
         </div>
-
         {/* Campo de entrada y botón */}
         <div className="p-4 border-t border-gray-300 flex items-center">
           <input

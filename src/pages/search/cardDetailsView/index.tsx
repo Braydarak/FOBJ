@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 const CardDetailsView: React.FC = () => {
   const location = useLocation();
-  const { cardId, collectionName, userEmail } = location.state || {};
+  const { cardId, collectionName } = location.state || {};
   const [cardDetails, setCardDetails] = useState<any>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);

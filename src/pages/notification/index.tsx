@@ -3,8 +3,6 @@ import Header from "../../components/header";
 import Layout from "../../components/layout";
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setHasUnread } from "../../reducers/notifications/notificationsSlice";
 import { NotificationProps } from "./types";
 import {
   collection,
@@ -17,7 +15,6 @@ import {
   updateDoc,
   where,
   getDocs,
-  collectionGroup,
 } from "firebase/firestore";
 import { firestore } from "../../firebase";
 import FobjIcon from "../../icons/fobjIcon";
@@ -28,7 +25,7 @@ const Notifications: React.FC = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
   const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
+  
 
   // Restored function to get username by email
   const getUsernameByEmail = async (email: string) => {
@@ -53,8 +50,7 @@ const Notifications: React.FC = () => {
     if (!user) return;
 
     setLoading(true);
-    let activeChats = 0;
-    let completedChats = 0;
+   
 
     const chatsRef = collection(firestore, "chats");
     const q = query(
