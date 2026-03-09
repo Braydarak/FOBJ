@@ -17,6 +17,7 @@ import MyObjects from "./pages/myobjects";
 import CardDetailsUser from "./pages/myobjects/cardDetailsUser";
 import Chat from "./pages/chat";
 import NotificationsPage from "./pages/notification";
+import ProtectedRoute from "./components/protectRoute/protectRoute";
 
 const App: React.FC = () => {
   return (
@@ -25,17 +26,26 @@ const App: React.FC = () => {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<SignIn />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/info" element={<ObjectInfo />} />
-            <Route path="/config" element={<ConfigPage />} />
-            <Route path="/report" element={<ReportPage />} />
             <Route path="/Register" element={<Register />} />
-            <Route path="/cardDetailsView/:id" element={<CardDetailsView />} />
-            <Route path="/myObjects" element={<MyObjects />} />
-            <Route path="/cardDetailsUser/:collectionName/:itemid" element={<CardDetailsUser />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/Notifications" element={<NotificationsPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/info" element={<ObjectInfo />} />
+              <Route path="/config" element={<ConfigPage />} />
+              <Route path="/report" element={<ReportPage />} />
+
+              <Route
+                path="/cardDetailsView/:id"
+                element={<CardDetailsView />}
+              />
+              <Route path="/myObjects" element={<MyObjects />} />
+              <Route
+                path="/cardDetailsUser/:collectionName/:itemid"
+                element={<CardDetailsUser />}
+              />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/Notifications" element={<NotificationsPage />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </Provider>
