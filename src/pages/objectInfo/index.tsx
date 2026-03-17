@@ -1,12 +1,10 @@
 import React from "react";
 import Layout from "../../components/layout";
-import Header from "../../components/header";
 import Button from "../../components/customButton";
 
 const ObjectInfo: React.FC = () => {
   return (
     <div>
-      <Header />
       <Layout>
         <h3 className="font-semibold text-[22px] w-full mt-10 text-inputText md:text-[40px] uppercase">
           REPORTADO POR JONYEZE

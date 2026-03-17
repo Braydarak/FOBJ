@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../components/header";
-import Layout from "../../components/layout";
 import Button from "../../components/customButton";
-import LineComponent from "../../components/lineComponent";
 import Dropdown from "../../components/dropdown";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Option } from "../../components/dropdown/types";
@@ -15,9 +12,17 @@ import ErrorComponent from "../../components/error";
 import Loader from "../../components/loader";
 import ArrowIcon from "../../icons/arrowIcon/arrowIcon";
 import { getObjectCardTitles } from "../../utils/objectCardTitles";
+import LineComponent from "../../components/lineComponent";
 
 const Search: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
+  const translations: Record<string, string> = {
+    Cash: "Dinero",
+    Clothing: "Ropa",
+    Phone: "Teléfono",
+    Dni: "Dni",
+    Other: "Otros",
+  };
   const [inputValue, setInputValue] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,7 +31,7 @@ const Search: React.FC = () => {
 
   const dispatch: AppDispatch = useDispatch();
   const collectionData = useSelector(
-    (state: RootState) => state.objects.collectionData
+    (state: RootState) => state.objects.collectionData,
   );
 
   const error = useSelector((state: RootState) => state.objects.error);
@@ -41,7 +46,7 @@ const Search: React.FC = () => {
   }, [location]);
 
   const handleDropdownChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
+    event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedOption(event.target.value);
     setInputValue("");
@@ -64,7 +69,7 @@ const Search: React.FC = () => {
         setVisibleCount(20);
       } catch (error) {
         setErrorMessage(
-          "No se pudo completar la búsqueda. Inténtelo de nuevo."
+          "No se pudo completar la búsqueda. Inténtelo de nuevo.",
         );
       } finally {
         setIsLoading(false);
@@ -88,7 +93,7 @@ const Search: React.FC = () => {
     } else {
       console.warn(
         "Coordenadas no disponibles o incorrectas para el item:",
-        item
+        item,
       );
     }
   };
@@ -130,85 +135,141 @@ const Search: React.FC = () => {
   const cardTitles = getObjectCardTitles(selectedOption);
 
   return (
-    <>
-      <Header />
-      <Layout>
-        <div className="flex flex-col items-center w-full">
-          <p className="font-semibold text-lg mt-12 md:text-[40px] md:text-left md:mb-4 w-full uppercase">
-            Busca tu objeto
-          </p>
-          <div className="md:w-2/5 md:mt-10 md:mb-5 w-full mt-3">
+    <div className="flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col items-center w-full mb-10">
+        <h1 className="font-bold text-2xl md:text-4xl text-gray-800 mb-8 uppercase tracking-wide text-center">
+          Encuentra tu objeto perdido
+        </h1>
+
+        {/* Search Controls */}
+        <div className="w-full md:w-3/5 lg:w-1/2 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-5">
+          <div className="w-full">
+            <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1">
+              Categoría
+            </label>
             <Dropdown
               options={dropdownOptions}
               value={selectedOption}
               onChange={handleDropdownChange}
             />
+          </div>
+
+          <div className="w-full">
+            <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1">
+              Detalles de búsqueda
+            </label>
             <CustomInput
               value={inputValue}
               placeholder={getPlaceholderText()}
               onChange={handleInputChange}
             />
           </div>
-          <div className="md:w-80 w-full mt-10">
-            <Button
-              text="Buscar"
-              textColor="text-backgroundcolor"
-              bgColor={selectedOption ? "bg-secondary" : "bg-disabled"}
-              roundedSize="rounded-[30px]"
-              disabled={!selectedOption}
-              textSize="text-[25px]"
-              textTransform="uppercase"
-              onClick={handleSearchClick}
-            />
-          </div>
 
-          <div className="mt-28 mb-20 w-4/5 mx-auto flex flex-col justify-center items-center">
-            {isLoading ? (
-              <Loader />
-            ) : errorMessage || error ? (
-              <>
-                <div className="mb-14 w-full">
-                  <LineComponent color="bg-inputs" border="border-inputs" />
-                </div>
-                <ErrorComponent message={errorMessage || error} />
-                <div className="mt-14 w-full">
-                  <LineComponent color="bg-inputs" border="border-inputs" />
-                </div>
-              </>
-            ) : !hasResults ? (
-              <>
-                <div className="mb-14 w-full">
-                  <LineComponent color="bg-inputs" border="border-inputs" />
-                </div>
-                <div className="text-center mt-4 mb-8">
-                  <p className="text-xl text-inputs">Completá los datos</p>
-                </div>
-                <div className="mt-14 w-full">
-                  <LineComponent color="bg-inputs" border="border-inputs" />
-                </div>
-              </>
-            ) : (
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[10rem] gap-y-[5rem] justify-items-center">
-                {collectionData[selectedOption]
-                  ?.slice(0, visibleCount)
-                  .map((item: any, index: number) => (
+          <div className="w-full mt-4 flex justify-center">
+            <div className="w-full md:w-2/3">
+              <Button
+                text="Buscar Objetos"
+                textColor="text-white"
+                bgColor={
+                  selectedOption
+                    ? "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    : "bg-gray-300"
+                }
+                roundedSize="rounded-xl"
+                disabled={!selectedOption}
+                textSize="text-lg"
+                textTransform="uppercase"
+                font="font-bold tracking-wide"
+                onClick={handleSearchClick}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Separator Line */}
+      <div className="w-full flex justify-center mb-10">
+        <LineComponent color="bg-black" />
+      </div>
+
+      {/* Results Section */}
+      <div className="w-full flex flex-col items-center justify-center flex-grow pb-24">
+        {isLoading ? (
+          <div className="my-20">
+            <Loader />
+          </div>
+        ) : errorMessage || error ? (
+          <div className="w-full max-w-2xl text-center p-8 bg-red-50 rounded-2xl border border-red-100">
+            <div className="text-red-500 mb-4">
+              <svg
+                className="w-12 h-12 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <ErrorComponent message={errorMessage || error} />
+          </div>
+        ) : !hasResults ? (
+          <div className="w-full max-w-2xl text-center p-12 bg-white rounded-2xl border border-gray-100 shadow-sm mt-8">
+            <div className="text-gray-300 mb-6">
+              <svg
+                className="w-20 h-20 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">
+              Comienza tu búsqueda
+            </h3>
+            <p className="text-gray-500">
+              Selecciona una categoría y completa los datos para encontrar lo
+              que buscas.
+            </p>
+          </div>
+        ) : (
+          <div className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 justify-items-center w-full mt-4">
+              {collectionData[selectedOption]
+                ?.slice(0, visibleCount)
+                .map((item: any, index: number) => (
+                  <div
+                    key={index}
+                    className="w-full flex justify-center hover:-translate-y-1 transition-transform duration-300"
+                  >
                     <ObjectCard
-                      key={index}
+                      category={translations[selectedOption] || selectedOption}
                       objectTop={cardTitles.top}
                       dataTop={truncateString(
                         item.documentNumber ||
-                        item.amount ||
-                        item.model ||
-                        item.brand ||
-                        item.title
-                  )}
+                          item.amount ||
+                          item.model ||
+                          item.brand ||
+                          item.title,
+                      )}
                       objectMiddle={cardTitles.middle}
                       dataMiddle={truncateString(
                         item.name ||
-                        item.location ||
-                        item.description ||
-                        item.color
-                  )}
+                          item.location ||
+                          item.description ||
+                          item.color,
+                      )}
                       objectBottom={cardTitles.bottom}
                       dataBottom={item.date}
                       address={item.map}
@@ -219,23 +280,26 @@ const Search: React.FC = () => {
                       }
                       onClick={() => handleCardClick(item)}
                     />
-                  ))}
+                  </div>
+                ))}
+            </div>
+
+            {/* Load More Button */}
+            {collectionData[selectedOption]?.length > visibleCount && (
+              <div className="flex justify-center mt-16 mb-8">
+                <button
+                  onClick={() => setVisibleCount(visibleCount + 10)}
+                  className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-full text-blue-600 font-semibold hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm"
+                >
+                  <ArrowIcon />
+                  <span>Cargar más resultados</span>
+                </button>
               </div>
             )}
           </div>
-          <div className="flex justify-center mb-28">
-            {collectionData[selectedOption]?.length > visibleCount && (
-              <button
-                onClick={() => setVisibleCount(visibleCount + 10)}
-                className="flex items-center text-primary hover:text-secondary focus:outline-none"
-              >
-                <ArrowIcon /> Cargar más
-              </button>
-            )}
-          </div>
-        </div>
-      </Layout>
-    </>
+        )}
+      </div>
+    </div>
   );
 };
 

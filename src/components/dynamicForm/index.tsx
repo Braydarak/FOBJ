@@ -3,6 +3,7 @@ import CustomInput from "../customInput";
 import Button from "../customButton";
 import { DynamicFormProps } from "./types";
 import Map from "../map";
+import AddressAutocomplete from "../addressAutocomplete";
 
 const DynamicForm: React.FC<DynamicFormProps> = ({
   fields,
@@ -10,49 +11,83 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   onInputChange,
   onSubmit,
   mapAddressHandler,
+  coordinates,
   ReadOnly,
 }) => {
   return (
-    <form onSubmit={onSubmit} className="md:flex md:flex-col md:items-center">
-      {fields.map((field) => (
-        <CustomInput
-          key={field.key}
-          label={`${field.label}:`}
-          type={
-            field.type === "date"
-              ? "date"
-              : field.type === "number"
-              ? "number"
-              : "text"
-          }
-          value={inputs[field.key] || ""}
-          onChange={(e) => onInputChange(field.key, e.target.value)}
-          placeholder={ field.placeholder
-            ? field.placeholder
-            : field.key === "map"
-            ? "Seleccionar direccion en el mapa..."
-            : undefined}
-          readOnly={field.key === "map" ? ReadOnly : undefined}
-        />
-      ))}
-      <div className="flex justify-center w-full mt-4">
+    <form onSubmit={onSubmit} className="flex flex-col w-full gap-5 relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 w-full relative">
+        {fields.map((field) => (
+          <div
+            key={field.key}
+            className={`w-full ${field.key === "map" || field.key === "description" || field.key === "information" ? "md:col-span-2" : ""}`}
+          >
+            {field.key !== "map" && (
+              <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1">
+                {field.label}
+              </label>
+            )}
+            {field.key === "map" && (
+              <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1 mt-2">
+                Ubicación en el Mapa
+              </label>
+            )}
+
+            {field.key === "map" ? (
+              <AddressAutocomplete
+                value={inputs[field.key] || ""}
+                onChange={(val) => onInputChange(field.key, val)}
+                onSelect={(address, coords) =>
+                  mapAddressHandler({ address, coordinates: coords })
+                }
+                placeholder="Busca o selecciona una dirección en el mapa..."
+                readOnly={ReadOnly}
+              />
+            ) : (
+              <CustomInput
+                label=""
+                type={
+                  field.type === "date"
+                    ? "date"
+                    : field.type === "number"
+                      ? "number"
+                      : "text"
+                }
+                value={inputs[field.key] || ""}
+                onChange={(e) => onInputChange(field.key, e.target.value)}
+                placeholder={
+                  field.placeholder
+                    ? field.placeholder
+                    : `Ingresa ${field.label.toLowerCase()}`
+                }
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full mt-1 mb-6 rounded-xl overflow-hidden border border-gray-200 shadow-inner z-0 relative">
         <Map
-          widthClass="w-[300px] md:w-[700px]"
-          heightClass="h-[200px]"
+          widthClass="w-full"
+          heightClass="h-[250px] md:h-[300px]"
           onAddressSelect={mapAddressHandler}
+          coordinates={coordinates || undefined}
         />
       </div>
 
-      <div className="md:w-80  w-full mt-10">
-        <Button
-          text="Guardar"
-          textColor="text-backgroundcolor"
-          bgColor="bg-secondary"
-          roundedSize="rounded-[30px]"
-          disabled={false}
-          textSize="text-[25px]"
-          textTransform="uppercase"
-        />
+      <div className="w-full flex justify-center mt-6">
+        <div className="w-full md:w-2/3">
+          <Button
+            text="Guardar Reporte"
+            textColor="text-white"
+            bgColor="bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            roundedSize="rounded-xl"
+            disabled={false}
+            textSize="text-lg"
+            textTransform="uppercase"
+            font="font-bold tracking-wide"
+          />
+        </div>
       </div>
     </form>
   );

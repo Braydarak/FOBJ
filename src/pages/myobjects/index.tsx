@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../components/layout";
-import Header from "../../components/header";
 import ObjectBar from "../../components/objectBar";
 import { useAuth } from "../../context/authContext";
 import { firestore } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { getObjectCardTitles } from "../../utils/objectCardTitles";
 import { useNavigate } from "react-router-dom";
-import FobjIcon from "../../icons/fobjIcon";
+import Loader from "../../components/loader";
 
 const MyObject: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -79,18 +78,10 @@ const MyObject: React.FC = () => {
   );
   return (
     <div>
-      <Header />
       <Layout>
         {authLoading || isLoading ? (
           <div className="flex items-center justify-center h-screen">
-            <div className="animate-spin " style={{ animationDuration: "2s" }}>
-              <FobjIcon
-                color={"#001F54"}
-                size="150"
-                height="150"
-                disablePointer={true}
-              />
-            </div>
+            <Loader />
           </div>
         ) : (
           <div className="flex flex-col items-center w-full mb-36 md:mb-0">
