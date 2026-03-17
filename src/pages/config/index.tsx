@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, firestore } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import Layout from "../../components/layout";
-import Header from "../../components/header";
 import Button from "../../components/customButton";
 import CustomInput from "../../components/customInput";
 import { useAuth } from "../../context/authContext";
 import UserIcon from "../../components/userIcon";
-import FobjIcon from "../../icons/fobjIcon";
+import Loader from "../../components/loader";
 
 const ConfigPage: React.FC = () => {
   const { user } = useAuth();
@@ -33,7 +31,6 @@ const ConfigPage: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  
   useEffect(() => {
     const fetchGoogleUserData = async (uid: string) => {
       const currentUser = auth.currentUser;
@@ -78,10 +75,6 @@ const ConfigPage: React.FC = () => {
     }
   }, [userId]);
 
- 
-
-  
-
   const saveUserData = async () => {
     if (!userId) return;
 
@@ -97,7 +90,7 @@ const ConfigPage: React.FC = () => {
             }
             return acc;
           },
-          {} as typeof inputData
+          {} as typeof inputData,
         ),
       };
 
@@ -136,38 +129,61 @@ const ConfigPage: React.FC = () => {
   };
 
   return (
-    <div className="overflow-x-hidden w-full flex flex-col h-full justify-between items-stretch">
-      <Header />
-      <Layout>
-        <h3 className="text-2xl w-full font-semibold my-8 uppercase">
-          configuración
+    <div className="overflow-x-hidden w-full flex flex-col h-full min-h-screen">
+      <div className="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 py-6 md:py-10 pb-28 md:pb-10">
+        <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 border-b pb-4 border-gray-200 uppercase tracking-wide">
+          Configuración de Perfil
         </h3>
-        <div className={`w-full md:grid ${isLoading ? "" : "md:grid-cols-2"}`}>
-          {isLoading ? (
-            <div className="flex items-center justify-center mt-20">
-              <div
-                className="animate-spin "
-                style={{ animationDuration: "2s" }}
-              >
-                <FobjIcon
-                  color={"#001F54"}
-                  size="150"
-                  height="150"
-                  disablePointer={true}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center flex-grow">
+            <Loader />
+          </div>
+        ) : (
+          <div className="flex flex-col md:flex-row-reverse gap-10 md:gap-16 items-start w-full">
+            {/* Sección de Foto de Perfil (Arriba en móvil, Derecha en escritorio) */}
+            <div className="w-full md:w-1/3 flex flex-col items-center space-y-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-gray-50 shadow-md flex items-center justify-center bg-gray-100">
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt="Foto de perfil"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 text-gray-400">
+                    <UserIcon />
+                  </div>
+                )}
+              </div>
+              <div className="w-full mt-4">
+                <Button
+                  text="Cambiar Foto"
+                  textColor="text-gray-700"
+                  withBorder={true}
+                  borderColor="border-gray-300"
+                  font="font-medium"
+                  bgColor="bg-white hover:bg-gray-50 transition-colors"
+                  disabled={false}
+                  textSize="text-sm"
+                  roundedSize="rounded-xl"
                 />
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
-              {/* row 1 */}
-              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-                usuario
-              </div>
-              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-                {userData.username ? (
-                  userData.username
-                ) : (
-                  <div className="h-0">
+
+            {/* Sección de Datos (Abajo en móvil, Izquierda en escritorio) */}
+            <div className="w-full md:w-2/3 space-y-6 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Usuario */}
+                <div className="col-span-1 md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Usuario
+                  </label>
+                  {userData.username ? (
+                    <div className="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium border border-gray-100">
+                      {userData.username}
+                    </div>
+                  ) : (
                     <CustomInput
                       value={inputData.username}
                       placeholder="Ingrese el usuario"
@@ -175,19 +191,19 @@ const ConfigPage: React.FC = () => {
                         handleInputChange("username", e.target.value)
                       }
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* row 2 */}
-              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-                nombre
-              </div>
-              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-                {userData.firstName ? (
-                  userData.firstName
-                ) : (
-                  <div className="h-0">
+                {/* Nombre */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Nombre
+                  </label>
+                  {userData.firstName ? (
+                    <div className="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium border border-gray-100">
+                      {userData.firstName}
+                    </div>
+                  ) : (
                     <CustomInput
                       value={inputData.firstName}
                       placeholder="Ingrese el nombre"
@@ -195,19 +211,19 @@ const ConfigPage: React.FC = () => {
                         handleInputChange("firstName", e.target.value)
                       }
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* row 3 */}
-              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-                Apellido
-              </div>
-              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-                {userData.lastName ? (
-                  userData.lastName
-                ) : (
-                  <div className="h-0">
+                {/* Apellido */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Apellido
+                  </label>
+                  {userData.lastName ? (
+                    <div className="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium border border-gray-100">
+                      {userData.lastName}
+                    </div>
+                  ) : (
                     <CustomInput
                       value={inputData.lastName}
                       placeholder="Ingrese el apellido"
@@ -215,19 +231,19 @@ const ConfigPage: React.FC = () => {
                         handleInputChange("lastName", e.target.value)
                       }
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* row 4 */}
-              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-1 uppercase">
-                email
-              </div>
-              <div className="bg-blue-500 text-right text-xl font-medium col-span-3">
-                {userData.email ? (
-                  userData.email
-                ) : (
-                  <div className="h-0">
+                {/* Email */}
+                <div className="col-span-1 md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Email
+                  </label>
+                  {userData.email ? (
+                    <div className="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium border border-gray-100 truncate">
+                      {userData.email}
+                    </div>
+                  ) : (
                     <CustomInput
                       value={inputData.email}
                       placeholder="Ingrese el email"
@@ -235,19 +251,19 @@ const ConfigPage: React.FC = () => {
                         handleInputChange("email", e.target.value)
                       }
                     />
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* row 5 */}
-              <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-                telefono
-              </div>
-              <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-                {userData.phoneNumber ? (
-                  userData.phoneNumber
-                ) : (
-                  <div className="h-0">
+                {/* Teléfono */}
+                <div className="col-span-1 md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Teléfono
+                  </label>
+                  {userData.phoneNumber ? (
+                    <div className="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium border border-gray-100">
+                      {userData.phoneNumber}
+                    </div>
+                  ) : (
                     <CustomInput
                       value={inputData.phoneNumber}
                       placeholder="Ingrese el teléfono"
@@ -255,57 +271,32 @@ const ConfigPage: React.FC = () => {
                         handleInputChange("phoneNumber", e.target.value)
                       }
                     />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {!isLoading && (
-            <div className="md:w-1/2  md:justify-center  md:items-center md:text-center md:mx-auto">
-              <div className="grid grid-cols-2 gap-4 w-full mt-10">
-                <div className="flex justify-center items-center">
-                  <Button
-                    text="Cargar Imagen"
-                    textColor={"text-inputBorder"}
-                    withBorder={true}
-                    borderColor="border-inputBorder"
-                    font="font-normal"
-                    bgColor="bg-gray-600"
-                    disabled={false}
-                  />
-                </div>
-                <div className="mx-auto w-20 h-20 ">
-                  {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="Foto de perfil"
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full mr-4 border-inputs border-[1px] flex items-center justify-center">
-                      <UserIcon />
-                    </div>
                   )}
                 </div>
               </div>
+
+              {/* Botón Guardar */}
+              <div className="pt-6 mt-6 border-t border-gray-100 flex justify-end">
+                <div className="w-full md:w-auto min-w-[200px]">
+                  <Button
+                    text="Guardar Cambios"
+                    textTransform="uppercase"
+                    textSize="text-base"
+                    textColor="text-white"
+                    bgColor="bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    roundedSize="rounded-xl"
+                    font="font-bold tracking-wide"
+                    withBorder={true}
+                    borderColor="border-blue-800"
+                    disabled={false}
+                    onClick={saveUserData}
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-        {!isLoading && (
-          <div className="md:w-80 w-full mt-10 md:mt-14">
-            <Button
-              text="Guardar"
-              textTransform="uppercase"
-              textSize="text-[25px]"
-              textColor="text-backgroundcolor"
-              bgColor="bg-secondary"
-              roundedSize="rounded-[30px]"
-              disabled={false}
-              onClick={saveUserData}
-            />
           </div>
         )}
-      </Layout>
+      </div>
     </div>
   );
 };

@@ -44,7 +44,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const loading = useSelector((state: RootState) => state.objects.loading);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-  const isReadOnly = true;
+  const isReadOnly = false;
 
   useEffect(() => {
     if (success) {
@@ -194,6 +194,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
             mapAddressHandler={handleAddressSelect}
+            coordinates={coordinates}
             ReadOnly={isReadOnly}
           />
         </div>

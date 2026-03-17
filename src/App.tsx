@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import { Provider } from "react-redux";
 import store from "./reducers/store";
@@ -18,35 +23,52 @@ import CardDetailsUser from "./pages/myobjects/cardDetailsUser";
 import Chat from "./pages/chat";
 import NotificationsPage from "./pages/notification";
 import ProtectedRoute from "./components/protectRoute/protectRoute";
+import Header from "./components/header";
+import Footer from "./components/footer";
+
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === "/" ||
+    location.pathname.toLowerCase() === "/register";
+
+  return (
+    <div className="flex flex-col min-h-screen w-full bg-backgroundcolor">
+      {!isAuthPage && <Header />}
+
+      <main className="flex-grow w-full flex flex-col">
+        <Routes>
+          <Route path="/" element={<SignIn />} />
+          <Route path="/Register" element={<Register />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/info" element={<ObjectInfo />} />
+            <Route path="/config" element={<ConfigPage />} />
+            <Route path="/report" element={<ReportPage />} />
+            <Route path="/cardDetailsView/:id" element={<CardDetailsView />} />
+            <Route path="/myObjects" element={<MyObjects />} />
+            <Route
+              path="/cardDetailsUser/:collectionName/:itemid"
+              element={<CardDetailsUser />}
+            />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/Notifications" element={<NotificationsPage />} />
+          </Route>
+        </Routes>
+      </main>
+
+      {!isAuthPage && <Footer />}
+    </div>
+  );
+};
 
 const App: React.FC = () => {
   return (
     <Router>
       <Provider store={store}>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<SignIn />} />
-            <Route path="/Register" element={<Register />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/info" element={<ObjectInfo />} />
-              <Route path="/config" element={<ConfigPage />} />
-              <Route path="/report" element={<ReportPage />} />
-
-              <Route
-                path="/cardDetailsView/:id"
-                element={<CardDetailsView />}
-              />
-              <Route path="/myObjects" element={<MyObjects />} />
-              <Route
-                path="/cardDetailsUser/:collectionName/:itemid"
-                element={<CardDetailsUser />}
-              />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/Notifications" element={<NotificationsPage />} />
-            </Route>
-          </Routes>
+          <AppContent />
         </AuthProvider>
       </Provider>
     </Router>

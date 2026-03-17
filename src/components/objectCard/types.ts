@@ -8,7 +8,8 @@ export type ObjectCardProps = {
   address: string;
   coordinates?: [number, number];
   onClick?: () => void;
-  };
+  category: string;
+};
   
 
  

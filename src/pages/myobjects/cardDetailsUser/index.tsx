@@ -11,7 +11,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import Loader from "../../../components/loader";
-import Header from "../../../components/header";
 import Layout from "../../../components/layout";
 import Button from "../../../components/customButton";
 import Map from "../../../components/map";
@@ -111,7 +110,6 @@ const CardDetailsUser: React.FC = () => {
 
     return (
       <>
-        <Header />
         <Layout>
         {isLoading ? (
           <div className="flex items-center justify-center w-full h-screen">
