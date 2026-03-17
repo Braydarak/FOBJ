@@ -25,6 +25,7 @@ import NotificationsPage from "./pages/notification";
 import ProtectedRoute from "./components/protectRoute/protectRoute";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import ScrollToTop from "./components/scrollToTop";
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -66,6 +67,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
+      <ScrollToTop />
       <Provider store={store}>
         <AuthProvider>
           <AppContent />
