@@ -63,13 +63,25 @@ const RootEntry: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
   const isAuthPage =
     location.pathname === "/" ||
     location.pathname.toLowerCase() === "/register";
+  const isChatPage = location.pathname.toLowerCase().startsWith("/chat");
+  const hideHeader = isAuthPage || (isMobile && isChatPage);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(media.matches);
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-backgroundcolor">
-      {!isAuthPage && <Header />}
+      {!hideHeader && <Header />}
 
       <main className="flex-grow w-full flex flex-col">
         <Routes>

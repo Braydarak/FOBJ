@@ -225,8 +225,8 @@ const Notifications: React.FC = () => {
             <Loader />
           </div>
         ) : (
-          <div className="w-full max-w-4xl mx-auto mt-4 md:mt-8 px-4">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="w-full mt-2 md:mt-8 md:max-w-4xl md:mx-auto px-0 md:px-4">
+            <div className="flex items-center gap-3 mb-4 md:mb-6 px-4 md:px-0">
               <div className="p-2 bg-blue-100 rounded-full">
                 <NotificationIcon color="#001F54" width={24} height={24} />
               </div>
@@ -236,15 +236,15 @@ const Notifications: React.FC = () => {
             </div>
 
             {notifications.length > 0 ? (
-              <div className="grid gap-4">
+              <div className="grid gap-3 md:gap-4">
                 {notifications.map((notif) => (
                   <div
                     key={notif.chatId}
                     onClick={() => handleNotificationClick(notif)}
                     className={`
                       group relative flex flex-col md:flex-row items-start md:items-center justify-between
-                      p-4 md:p-5 rounded-xl border transition-all duration-300 cursor-pointer
-                      hover:shadow-md hover:scale-[1.01] hover:border-blue-200
+                      w-full p-4 md:p-5 rounded-none md:rounded-xl border border-x-0 md:border-x transition-all duration-300 cursor-pointer
+                      hover:shadow-md hover:border-blue-200
                       ${
                         notif.isUnread
                           ? "bg-white border-blue-100 shadow-sm border-l-4 border-l-blue-500"
@@ -253,7 +253,7 @@ const Notifications: React.FC = () => {
                     `}
                   >
                     {/* Content Section */}
-                    <div className="flex-1 min-w-0 pr-4 w-full">
+                    <div className="flex-1 min-w-0 pr-0 md:pr-4 w-full">
                       <div className="flex items-center justify-between md:justify-start gap-2 mb-1">
                         <span
                           className={`text-lg font-bold truncate ${notif.isUnread ? "text-gray-900" : "text-gray-700"}`}
@@ -265,7 +265,7 @@ const Notifications: React.FC = () => {
                             Nuevo
                           </span>
                         )}
-                        <span className="md:hidden text-xs text-gray-400 ml-auto">
+                        <span className="md:hidden text-xs text-gray-400 ml-auto whitespace-nowrap">
                           {formatTime(notif.createdAt)}
                         </span>
                       </div>
@@ -297,7 +297,7 @@ const Notifications: React.FC = () => {
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           ></path>
                         </svg>
-                        <span className="truncate max-w-[200px]">
+                        <span className="truncate max-w-[70vw] md:max-w-[200px]">
                           {notif.map || "Ubicación desconocida"}
                         </span>
                       </div>
@@ -329,7 +329,7 @@ const Notifications: React.FC = () => {
                       onClick={(e) =>
                         handleDeleteNotification(notif.chatId!, e)
                       }
-                      className="md:hidden absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 active:bg-red-50 rounded-full transition-colors"
+                      className="md:hidden absolute top-10 right-3 p-2 text-gray-400 hover:text-red-500 active:bg-red-50 rounded-full transition-colors"
                     >
                       <DeleteIcon width={16} height={16} color="currentColor" />
                     </button>

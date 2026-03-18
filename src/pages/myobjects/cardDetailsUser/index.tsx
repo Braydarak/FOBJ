@@ -82,12 +82,13 @@ const CardDetailsUser: React.FC = () => {
     }
   };
 
- 
-  
   const fieldsByCollection: Record<string, Field[]> = {
     Dni: [
       { label: "Nombre", value: itemDetails?.name || "N/A" },
-      { label: "Número de documento", value: itemDetails?.documentNumber || "N/A" },
+      {
+        label: "Número de documento",
+        value: itemDetails?.documentNumber || "N/A",
+      },
       { label: "Dirección", value: itemDetails?.address || "N/A" },
     ],
     Cash: [
@@ -106,94 +107,140 @@ const CardDetailsUser: React.FC = () => {
     Other: [{ label: "Descripción", value: itemDetails?.description || "N/A" }],
   };
 
-    const specificFields = fieldsByCollection[collectionName!] || [];
+  const specificFields = fieldsByCollection[collectionName!] || [];
+  const formattedDate = itemDetails?.date
+    ? itemDetails.date.split("-").reverse().join("/")
+    : "N/A";
 
-    return (
-      <>
-        <Layout>
+  return (
+    <div className="w-full min-h-screen bg-gray-50 pb-24 md:pb-0">
+      <Layout>
         {isLoading ? (
-          <div className="flex items-center justify-center w-full h-screen">
+          <div className="flex items-center justify-center w-full h-[60vh]">
             <Loader height="h-[70px]" width="w-[70px]" />
           </div>
         ) : (
-         
-            <div className="mb-48 md:mb-0">
-              <h3 className="text-xl w-full font-semibold my-8 uppercase">
-                Reportado por {userDetails?.username || "N/A"}
-              </h3>
-              <div className="w-full md:grid md:grid-cols-2 gap-6">
-                <div className="grid grid-cols-4 grid-rows-5 gap-4 w-full space-y-2 md:w-full">
-                  {specificFields.map((field: Field, index: number) => (
-                    <React.Fragment key={index}>
-                      <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
+          <div className="w-full md:max-w-5xl md:mx-auto px-4 md:px-6 py-6 md:py-10">
+            <button
+              className="inline-flex items-center justify-center text-secondary hover:text-primary w-10 h-10 rounded-full hover:bg-white transition-colors mb-4"
+              onClick={() => navigate("/myobjects")}
+              aria-label="Volver"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 19.5 3 12l7.5-7.5M3 12h18"
+                />
+              </svg>
+            </button>
+
+            <div className="flex items-start justify-between gap-4 mb-6 md:mb-10">
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-4xl font-bold text-gray-900 uppercase tracking-tight truncate">
+                  Detalle del reporte
+                </h1>
+                <p className="text-sm md:text-base text-gray-500 mt-1">
+                  Reportado por {userDetails?.username || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="w-full bg-white rounded-xl border border-gray-100 shadow-sm p-5 md:p-6">
+                <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-4">
+                  Información
+                </h2>
+
+                <div className="flex flex-col gap-3">
+                  {specificFields.map((field: Field) => (
+                    <div
+                      key={field.label}
+                      className="flex items-start justify-between gap-4"
+                    >
+                      <span className="text-sm md:text-base text-gray-500 font-medium">
                         {field.label}
-                      </div>
-                      <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
+                      </span>
+                      <span className="text-sm md:text-base text-gray-900 font-semibold text-right break-words">
                         {field.value || "N/A"}
-                      </div>
-                    </React.Fragment>
+                      </span>
+                    </div>
                   ))}
 
-                  <div className="bg-blue-500 text-left text-2xl font-semibold col-span-2 uppercase">
-                    Fecha
-                  </div>
-                  <div className="bg-blue-500 text-end text-xl font-medium col-span-2">
-                    {itemDetails.date
-                      ? itemDetails.date.split("-").reverse().join("/")
-                      : "N/A"}
-                  </div>
-                </div>
+                  <div className="h-px bg-gray-100 my-1" />
 
-                <div className="flex flex-col items-center justify-center ">
-                  <div className="font-semibold text-2xl text-center mt-5 md:mt-0 uppercase">
-                    Encontrado en
-                  </div>
-                  <div className="w-full flex flex-col items-center justify-center">
-                    <div className="w-full text-center mb-3">
-                      {itemDetails.map || "Mapa no disponible"}
-                    </div>
-
-                    <div className="flex items-center justify-center">
-                      {itemDetails.coordinates &&
-                      itemDetails.coordinates.length === 2 ? (
-                        <Map
-                          widthClass="w-[300px] md:w-[450px]"
-                          heightClass="h-[150px] md:h-[250px]"
-                          showSearchControl={false}
-                          zoom={14}
-                          zoomControl={false}
-                          coordinates={itemDetails.coordinates}
-                          onAddressSelect={() => {}}
-                        />
-                      ) : (
-                        <p>Coordenadas no disponibles</p>
-                      )}
-                    </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-sm md:text-base text-gray-500 font-medium">
+                      Fecha
+                    </span>
+                    <span className="text-sm md:text-base text-gray-900 font-semibold text-right">
+                      {formattedDate}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="w-full flex justify-center mt-10 md:mt-14">
-                <div className="md:w-80 w-full">
-                  <Button
-                    text="Eliminar"
-                    textTransform="uppercase"
-                    textSize="text-[25px]"
-                    textColor="text-backgroundcolor"
-                    bgColor="bg-secondary"
-                    roundedSize="rounded-[30px]"
-                    disabled={false}
-                    onClick={handleDelete}
-                  />
+              <div className="w-full bg-white rounded-xl border border-gray-100 shadow-sm p-5 md:p-6">
+                <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-4">
+                  Ubicación
+                </h2>
+
+                <p className="text-sm md:text-base text-gray-700 break-words">
+                  {itemDetails?.map || "Mapa no disponible"}
+                </p>
+
+                <div className="mt-4">
+                  {itemDetails?.coordinates &&
+                  itemDetails.coordinates.length === 2 ? (
+                    <Map
+                      widthClass="w-full"
+                      heightClass="h-[180px] md:h-[260px]"
+                      showSearchControl={false}
+                      zoom={14}
+                      zoomControl={false}
+                      disableDragging={true}
+                      disableZoom={true}
+                      disableScrollWheelZoom={true}
+                      disableDoubleClickZoom={true}
+                      disableBoxZoom={true}
+                      coordinates={itemDetails.coordinates}
+                      onAddressSelect={() => {}}
+                    />
+                  ) : (
+                    <div className="w-full h-[180px] md:h-[260px] rounded-xl border border-gray-100 flex items-center justify-center text-gray-500">
+                      Coordenadas no disponibles
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-         
+
+            <div className="w-full flex justify-center mt-8 md:mt-10">
+              <div className="w-full md:w-80">
+                <Button
+                  text="Eliminar"
+                  textTransform="uppercase"
+                  textSize="text-[18px]"
+                  textColor="text-backgroundcolor"
+                  bgColor="bg-secondary"
+                  roundedSize="rounded-full"
+                  disabled={false}
+                  onClick={handleDelete}
+                />
+              </div>
+            </div>
+          </div>
         )}
-         </Layout>
-      </>
-    );
-  };
- ;
+      </Layout>
+    </div>
+  );
+};
 
 export default CardDetailsUser;
