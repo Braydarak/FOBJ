@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/authContext";
 
 import Home from "./pages/Home";
 import SignIn from "./pages/login/signIn";
+import AppInstall from "./pages/appInstall";
 import Search from "./pages/search";
 import ObjectInfo from "./pages/objectInfo";
 import ConfigPage from "./pages/config";
@@ -27,6 +28,26 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 import ScrollToTop from "./components/scrollToTop";
 
+const RootEntry: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [skipInstall, setSkipInstall] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(media.matches);
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  if (isMobile && !skipInstall) {
+    return <AppInstall onContinue={() => setSkipInstall(true)} />;
+  }
+
+  return <SignIn />;
+};
+
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isAuthPage =
@@ -39,7 +60,7 @@ const AppContent: React.FC = () => {
 
       <main className="flex-grow w-full flex flex-col">
         <Routes>
-          <Route path="/" element={<SignIn />} />
+          <Route path="/" element={<RootEntry />} />
           <Route path="/Register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
