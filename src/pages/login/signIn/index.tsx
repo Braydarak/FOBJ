@@ -4,8 +4,8 @@ import Button from "../../../components/customButton";
 import LogoCircle from "../../../components/logoCircle";
 import GoogleIcon from "../../../icons/googleIcon/googleIcon";
 import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
-import LoginImg from "../../../assets/webp/login-img.webp";
 import ErrorComponent from "../../../components/error";
+import Loader from "../../../components/loader";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/authContext";
 import FobjIcon from "../../../icons/fobjIcon";
@@ -16,12 +16,16 @@ const SignIn: React.FC = () => {
     password: "",
   });
 
-  const { login, loginWhitGoogle, loginWithFacebook ,resetPassword } = useAuth();
+  const { login, loginWhitGoogle, loginWithFacebook, resetPassword } =
+    useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [verified, setVerified] = useState<string | null>(null);
+  const [isLoggingInWithEmail, setIsLoggingInWithEmail] = useState(false);
   const [isLoggingInWithGoogle, setIsLoggingInWithGoogle] = useState(false);
   const [isLoggingInWithFacebook, setIsLoggingInWithFacebook] = useState(false);
+  const isLoggingIn =
+    isLoggingInWithEmail || isLoggingInWithGoogle || isLoggingInWithFacebook;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -33,10 +37,11 @@ const SignIn: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoggingInWithGoogle|| isLoggingInWithFacebook) return;
+    if (isLoggingIn) return;
 
     setError("");
     try {
+      setIsLoggingInWithEmail(true);
       await login(user.email, user.password);
       navigate("/home");
     } catch (err) {
@@ -63,6 +68,8 @@ const SignIn: React.FC = () => {
       } else {
         setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
       }
+    } finally {
+      setIsLoggingInWithEmail(false);
     }
   };
 
@@ -89,7 +96,6 @@ const SignIn: React.FC = () => {
       setIsLoggingInWithFacebook(false);
     }
   };
-  
 
   const handleRegister = () => {
     navigate("/register");
@@ -105,9 +111,13 @@ const SignIn: React.FC = () => {
         setVerified("Te hemos enviado un email de confirmación");
       } else {
         if (resetResult.error.code === "auth/user-not-found") {
-          setError("No hay ninguna cuenta registrada con este correo electrónico.");
+          setError(
+            "No hay ninguna cuenta registrada con este correo electrónico.",
+          );
         } else {
-          setError("Error al enviar el email de restablecimiento de contraseña.");
+          setError(
+            "Error al enviar el email de restablecimiento de contraseña.",
+          );
         }
       }
     } catch (error) {
@@ -116,12 +126,22 @@ const SignIn: React.FC = () => {
   };
 
   return (
-    <div className="login-desktop overflow-y-hidden h-screen w-full drop-shadow-sm">
-      <div className="hidden md:flex relative">
-        <img alt="login-img" src={LoginImg} className=" bg-cover w-full" />
+    <div className="login-desktop overflow-y-hidden h-screen w-full drop-shadow-sm md:flex">
+      <div className="hidden md:flex relative flex-1 h-screen">
+        <video
+          className="w-full h-full object-cover"
+          src="/video.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="absolute bottom-8 left-0 w-full flex justify-center drop-shadow-md">
+          <FobjIcon color={"#FFFFFF"} />
+        </div>
       </div>
 
-      <div className="flex flex-col h-screen px-7 py-7 md:px-14 justify-between items-center">
+      <div className="w-full md:w-[40%] md:flex-none flex flex-col h-screen px-7 py-7 md:px-14 justify-between items-center">
         <header className="flex justify-center items-center w-full flex-col">
           <h2 className="uppercase text-[32px] md:text-[54px] font-semibold text-primary">
             Bienvenido
@@ -131,61 +151,75 @@ const SignIn: React.FC = () => {
           </span>
         </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="w-full flex justify-center items-center flex-col h-screen gap-6 relative md:mt-10 md:gap-8"
-        >
-          {verified && <ErrorComponent textColor="text-successGreen" message={verified} />}
-          {error && <ErrorComponent message={error} />}
-          <CustomInput
-            placeholder="Email"
-            label="Email"
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-          />
-          <CustomInput
-            placeholder="Contraseña"
-            type="password"
-            label="Contraseña"
-            name="password"
-            value={user.password}
-            onChange={handleChange}
-            underlabel="Olvidaste la contraseña?"
-            onUnderlabelClick={handleUnderlabelClick}
-          />
-
-          <Button
-            text={"Iniciar sesión"}
-            textColor={"text-backgroundcolor"}
-            bgColor={"bg-secondary"}
-            disabled={false}
-          />
-
-          <div className="flex justify-around items-center w-full">
-            <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
-            <span className="text-[15px] text-center font-normal text-inputs md:text-xl">
-              O conéctese con
-            </span>
-            <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
+        {isLoggingIn ? (
+          <div className="w-full flex items-center justify-center flex-1">
+            <Loader />
           </div>
-          <div className="w-full flex justify-center">
-            <LogoCircle
-              logoComponent={<GoogleIcon />}
-              onClick={handleGoogleSignIn}
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="w-full flex justify-center items-center flex-col flex-1 gap-6 relative md:mt-10 md:gap-8"
+          >
+            {verified && (
+              <ErrorComponent
+                textColor="text-successGreen"
+                message={verified}
+              />
+            )}
+            {error && <ErrorComponent message={error} />}
+            <CustomInput
+              placeholder="Email"
+              label="Email"
+              name="email"
+              value={user.email}
+              onChange={handleChange}
             />
-            <LogoCircle logoComponent={<FacebookIcon />} onClick={handleFacebookLogin} />
-          </div>
-          <div className="w-full flex justify-center items-center text-base md:text-xl">
-            <span className="text-inputs mr-2">No tenes cuenta?</span>
-            <span
-              className="text-secondary cursor-pointer hover:underline"
-              onClick={handleRegister}
-            >
-              Crear Cuenta
-            </span>
-          </div>
-        </form>
+            <CustomInput
+              placeholder="Contraseña"
+              type="password"
+              label="Contraseña"
+              name="password"
+              value={user.password}
+              onChange={handleChange}
+              underlabel="Olvidaste la contraseña?"
+              onUnderlabelClick={handleUnderlabelClick}
+            />
+
+            <Button
+              text={"Iniciar sesión"}
+              textColor={"text-backgroundcolor"}
+              bgColor={"bg-secondary"}
+              disabled={false}
+            />
+
+            <div className="flex justify-around items-center w-full">
+              <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
+              <span className="text-[15px] text-center font-normal text-inputs md:text-xl">
+                O conéctese con
+              </span>
+              <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
+            </div>
+            <div className="w-full flex justify-center">
+              <LogoCircle
+                logoComponent={<GoogleIcon />}
+                onClick={handleGoogleSignIn}
+              />
+              <LogoCircle
+                logoComponent={<FacebookIcon />}
+                onClick={handleFacebookLogin}
+              />
+            </div>
+            <div className="w-full flex justify-center items-center text-base md:text-xl">
+              <span className="text-inputs mr-2">No tenes cuenta?</span>
+              <span
+                className="text-secondary cursor-pointer hover:underline"
+                onClick={handleRegister}
+              >
+                Crear Cuenta
+              </span>
+            </div>
+          </form>
+        )}
 
         <footer className="justify-center flex bottom-0 left-0 w-full md:hidden mt-3">
           <FobjIcon color={"#001F54"} />

@@ -59,7 +59,11 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
 
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && (
+        <div className="hidden md:block">
+          <Footer />
+        </div>
+      )}
     </div>
   );
 };

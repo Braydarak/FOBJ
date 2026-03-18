@@ -11,9 +11,16 @@ import {
   fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { auth, firestore } from "../firebase";
-import { getDocs, getDoc, query, where, collection, setDoc, doc } from "firebase/firestore";
+import {
+  getDocs,
+  getDoc,
+  query,
+  where,
+  collection,
+  setDoc,
+  doc,
+} from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-
 
 export const authContext = createContext();
 
@@ -36,21 +43,24 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const signUp = async (email, password, additionalData) => {
+  const signUp = async (email, password, additionalData = {}) => {
+    if (additionalData?.username) {
+      const usernameQuery = query(
+        collection(firestore, "users"),
+        where("username", "==", additionalData.username),
+      );
+      const usernameSnapshot = await getDocs(usernameQuery);
 
-      // Verifica si el nombre de usuario ya existe en Firestore
-  const usernameQuery = query(
-    collection(firestore, "users"),
-    where("username", "==", additionalData.username)
-  );
-  const usernameSnapshot = await getDocs(usernameQuery);
+      if (!usernameSnapshot.empty) {
+        throw new Error("El nombre de usuario ya está en uso.");
+      }
+    }
 
-  if (!usernameSnapshot.empty) {
-    // Si se encuentra un usuario con el mismo nombre, lanza un error
-    throw new Error("El nombre de usuario ya está en uso.");
-  }
-
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     const createdUser = userCredential.user;
 
     // Guardar datos adicionales en Firestore
@@ -62,10 +72,10 @@ export function AuthProvider({ children }) {
     return createdUser;
   };
 
-  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  const login = (email, password) =>
+    signInWithEmailAndPassword(auth, email, password);
 
   const logout = () => signOut(auth);
-
 
   //GoogleAhut
   const checkUserAdditionalData = async (userId) => {
@@ -82,24 +92,22 @@ export function AuthProvider({ children }) {
     const result = await signInWithPopup(auth, GoogleProvider);
     const user = result.user;
 
-
     const hasAdditionalData = await checkUserAdditionalData(user.uid);
     if (hasAdditionalData) {
-      navigate('/home');
+      navigate("/home");
     } else {
-      navigate('/config');
+      navigate("/config");
     }
   };
-
 
   //FacebookAhut
   const loginWithFacebook = async () => {
     const FacebookProvider = new FacebookAuthProvider();
-    FacebookProvider.addScope('email');
+    FacebookProvider.addScope("email");
     FacebookProvider.setCustomParameters({
-      display: 'popup',
+      display: "popup",
     });
-    
+
     try {
       const result = await signInWithPopup(auth, FacebookProvider);
       const user = result.user;
@@ -119,11 +127,11 @@ export function AuthProvider({ children }) {
           const providers = await fetchSignInMethodsForEmail(auth, email);
           if (providers.includes("google.com")) {
             throw new Error(
-              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con Google."
+              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con Google.",
             );
           } else if (providers.includes("password")) {
             throw new Error(
-              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con correo electrónico y contraseña."
+              "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, inicia sesión con correo electrónico y contraseña.",
             );
           }
         }
@@ -132,11 +140,11 @@ export function AuthProvider({ children }) {
         error.code === "auth/popup-closed-by-user"
       ) {
         throw new Error(
-          "La ventana emergente de inicio de sesión se cerró antes de completarse."
+          "La ventana emergente de inicio de sesión se cerró antes de completarse.",
         );
       } else {
         throw new Error(
-          "Ocurrió un error inesperado durante el inicio de sesión con Facebook."
+          "Ocurrió un error inesperado durante el inicio de sesión con Facebook.",
         );
       }
     }

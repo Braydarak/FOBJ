@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import FobjIcon from "../../../icons/fobjIcon";
 import CustomInput from "../../../components/customInput";
 import Button from "../../../components/customButton";
-import LoginImg from "../../../assets/webp/login-img.webp";
+import LogoCircle from "../../../components/logoCircle";
+import GoogleIcon from "../../../icons/googleIcon/googleIcon";
+import FacebookIcon from "../../../icons/facebookIcon/facebookIcon";
 import ErrorComponent from "../../../components/error";
 import { useNavigate } from "react-router-dom";
-import { firestore } from "../../../firebase"; 
-import { collection, query, where, getDocs } from "firebase/firestore";
-
-
 import { useAuth } from "../../../context/authContext";
 
 const Register: React.FC = () => {
@@ -16,28 +14,18 @@ const Register: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
-    username: "",
-    firstName: "",
-    lastName: "",
-    city: "",
   });
 
-  const { signUp } = useAuth();
+  const { signUp, loginWhitGoogle, loginWithFacebook } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [verified, setVerified] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-
- const capitalizedValue = ["username", "firstName", "lastName", "city"].includes(name)
-    ? value.charAt(0).toUpperCase() + value.slice(1)
-    : value;
-
     setUser((user) => ({
       ...user,
-      [name]: capitalizedValue,
+      [name]: value,
     }));
   };
 
@@ -45,13 +33,10 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    // Validación para campos obligatorios
-  for (const key in user) {
-    if (key !== "phoneNumber" && user[key as keyof typeof user].trim() === "") {
+    if (!user.email.trim() || !user.password.trim() || !user.confirmPassword.trim()) {
       setError("Todos los campos son obligatorios.");
       return;
     }
-  }
 
     if (user.password !== user.confirmPassword) {
       setError("Las contraseñas no coinciden.");
@@ -59,27 +44,7 @@ const Register: React.FC = () => {
     }
 
     try {
-
-       // Verifica si el nombre de usuario ya existe en Firestore
-       const usernameQuery = query(
-        collection(firestore, "users"),
-        where("username", "==", user.username)
-      );
-      const usernameSnapshot = await getDocs(usernameQuery);
-
-      if (!usernameSnapshot.empty) {
-        setError("El nombre de usuario ya está en uso.");
-        return; // Detener el flujo si el nombre de usuario está en uso
-      }
-
-
-      await signUp(user.email, user.password, {
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        city: user.city,
-        phoneNumber: user.phoneNumber || "",
-      });
+      await signUp(user.email, user.password);
       setVerified("Te registraste correctamente. Redirigiendo...");
       setTimeout(() => {
         setError(null);
@@ -115,13 +80,39 @@ const Register: React.FC = () => {
     navigate("/");
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await loginWhitGoogle();
+    } catch (error) {
+      setError("No se pudo continuar con Google");
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      await loginWithFacebook();
+    } catch (error: any) {
+      setError(error.message || "No se pudo continuar con Facebook");
+    }
+  };
+
   return (
-    <div className="login-desktop overflow-y-hidden h-screen w-full drop-shadow-sm">
-      <div className="hidden md:flex relative">
-        <img alt="login-img" src={LoginImg} className=" bg-cover w-full" />
+    <div className="login-desktop overflow-y-hidden h-screen w-full drop-shadow-sm md:flex">
+      <div className="hidden md:flex relative flex-1 h-screen">
+        <video
+          className="w-full h-full object-cover"
+          src="/video.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="absolute bottom-8 left-0 w-full flex justify-center drop-shadow-md">
+          <FobjIcon color={"#FFFFFF"} />
+        </div>
       </div>
 
-      <div className="flex flex-col h-screen overflow-y-auto px-7 py-7 md:px-14 justify-between items-center">
+      <div className="w-full md:w-[40%] md:flex-none flex flex-col h-screen px-7 py-7 md:px-14 justify-between items-center">
         <header className="flex justify-center items-center w-full flex-col">
           <h2 className="uppercase text-[32px] md:text-[54px] font-semibold text-primary">
             Registrate
@@ -133,50 +124,17 @@ const Register: React.FC = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="w-full flex mt-10 mb-10 items-center flex-col h-screen gap-0 relative md:gap-0"
+          className="w-full flex justify-center items-center flex-col flex-1 gap-6 relative md:mt-10 md:gap-8"
         >
-          {verified  && <ErrorComponent textColor="text-successGreen" message={verified} />}
-          {error && <ErrorComponent  message={error} />}
-          <CustomInput
-            placeholder="Nombre de Usuario"
-            label="Nombre de Usuario"
-            name="username"
-            value={user.username}
-            onChange={handleChange}
-          />
-          <CustomInput
-            placeholder="Nombre"
-            label="Nombre"
-            name="firstName"
-            value={user.firstName}
-            onChange={handleChange}
-          />
-          <CustomInput
-            placeholder="Apellido"
-            label="Apellido"
-            name="lastName"
-            value={user.lastName}
-            onChange={handleChange}
-          />
-          <CustomInput
-            placeholder="Ciudad"
-            label="Ciudad"
-            name="city"
-            value={user.city}
-            onChange={handleChange}
-          />
+          {verified && (
+            <ErrorComponent textColor="text-successGreen" message={verified} />
+          )}
+          {error && <ErrorComponent message={error} />}
           <CustomInput
             placeholder="Email"
             label="Email"
             name="email"
             value={user.email}
-            onChange={handleChange}
-          />
-           <CustomInput
-            placeholder="Teléfono"
-            label="Teléfono"
-            name="phoneNumber"
-            value={user.phoneNumber}
             onChange={handleChange}
           />
           <CustomInput
@@ -195,7 +153,6 @@ const Register: React.FC = () => {
             value={user.confirmPassword}
             onChange={handleChange}
           />
-          
 
           <Button
             text={"Registrarme"}
@@ -203,6 +160,23 @@ const Register: React.FC = () => {
             bgColor={"bg-secondary"}
             disabled={false}
           />
+          <div className="flex justify-around items-center w-full">
+            <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
+            <span className="text-[15px] text-center font-normal text-inputs md:text-xl">
+              O conéctese con
+            </span>
+            <div className="bg-inputBorder border border-inputs w-[25%] md:w-[30%] h-[1px]"></div>
+          </div>
+          <div className="w-full flex justify-center">
+            <LogoCircle
+              logoComponent={<GoogleIcon />}
+              onClick={handleGoogleSignIn}
+            />
+            <LogoCircle
+              logoComponent={<FacebookIcon />}
+              onClick={handleFacebookLogin}
+            />
+          </div>
           <div className="w-full flex justify-center items-center text-base md:text-xl">
             <span className="text-inputs mr-2">Ya tienes una cuenta?</span>
             <span
