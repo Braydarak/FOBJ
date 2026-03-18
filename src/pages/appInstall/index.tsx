@@ -38,6 +38,14 @@ const AppInstall: React.FC<AppInstallProps> = ({ onContinue }) => {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      if (onContinue) onContinue();
+    };
+    window.addEventListener("appinstalled", handler);
+    return () => window.removeEventListener("appinstalled", handler);
+  }, [onContinue]);
+
   const handleInstall = async () => {
     if (isIos) {
       setShowIosHelp(true);
@@ -49,8 +57,9 @@ const AppInstall: React.FC<AppInstallProps> = ({ onContinue }) => {
     try {
       setIsInstalling(true);
       await deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      const choice = await deferredPrompt.userChoice;
       setDeferredPrompt(null);
+      if (choice.outcome === "accepted" && onContinue) onContinue();
     } finally {
       setIsInstalling(false);
     }

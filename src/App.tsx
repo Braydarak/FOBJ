@@ -30,6 +30,7 @@ import ScrollToTop from "./components/scrollToTop";
 
 const RootEntry: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const [skipInstall, setSkipInstall] = useState(false);
 
   useEffect(() => {
@@ -41,7 +42,19 @@ const RootEntry: React.FC = () => {
     return () => media.removeEventListener("change", sync);
   }, []);
 
-  if (isMobile && !skipInstall) {
+  useEffect(() => {
+    const displayModeMedia = window.matchMedia("(display-mode: standalone)");
+    const sync = () => {
+      const iosStandalone = Boolean((window.navigator as any).standalone);
+      setIsStandalone(displayModeMedia.matches || iosStandalone);
+    };
+
+    sync();
+    displayModeMedia.addEventListener("change", sync);
+    return () => displayModeMedia.removeEventListener("change", sync);
+  }, []);
+
+  if (isMobile && !isStandalone && !skipInstall) {
     return <AppInstall onContinue={() => setSkipInstall(true)} />;
   }
 
