@@ -42,6 +42,17 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 }
                 placeholder="Busca o selecciona una dirección en el mapa..."
                 readOnly={ReadOnly}
+              />) : field.type === "file" ? ( 
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    onInputChange(field.key, e.target.files[0]);
+                  }
+                }}
+                className="w-full px-3 py-2 text-sm text-gray-500 bg-white border border-gray-400 rounded-md cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 file:hidden"
+                disabled={ReadOnly}
               />
             ) : (
               <CustomInput

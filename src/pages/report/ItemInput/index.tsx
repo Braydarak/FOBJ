@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import DynamicForm from "../../../components/dynamicForm";
 import { Field } from "../../../components/preview/types";
+import { compressImageNative } from "../../../utils/objectCardTitles/imageCompressor";
+import { uploadImageToCloudinary } from "../../../utils/cloudinary/cloudinaryUpload";
+import { collection, doc } from "firebase/firestore";
+import { firestore } from "../../../firebase";
 //Actions Redux
 import {
   updateInputs,
   writeToFirebase,
   clearInputs,
+  setLoading,
 } from "../../../reducers/actions/objectActions";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../reducers/store";
@@ -43,6 +48,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
   const error = useSelector((state: RootState) => state.objects.error);
   const loading = useSelector((state: RootState) => state.objects.loading);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const isReadOnly = false;
 
@@ -58,7 +64,12 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     }
   }, [success, navigate, dispatch, selectedOption]);
 
-  const handleInputChange = (key: string, value: string) => {
+  const handleInputChange = (key: string, value: any) => {
+    if (key === "image" && value instanceof File) {
+      setImageFile(value);
+      return;
+    }
+
     const updatedInputs = {
       ...inputs,
       [key]: value,
@@ -82,7 +93,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const isValid = Object.values(inputs).every(
@@ -102,11 +113,47 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
       setValidationMessage("ID de usuario no disponible.");
       return;
     }
+
+    let imageUrl = null;
+
+    const collectionRef = collection(firestore, selectedOption);
+    const newDocRef = doc(collectionRef);
+    const firebaseId = newDocRef.id;
+
+    
+    const folderName = selectedOption.toLowerCase();
+    
+
+    if (imageFile) {
+      try {
+        dispatch(setLoading(true));
+
+        // 1. Comprimimos
+        const compressedFile = await compressImageNative(imageFile);
+
+        // 2. Subimos a Cloudinary
+       imageUrl = await uploadImageToCloudinary(compressedFile, folderName, firebaseId);
+
+        if (!imageUrl) {
+          setValidationMessage("Error al subir la imagen. Inténtalo de nuevo.");
+          dispatch(setLoading(false));
+          return;
+        }
+      } catch (error) {
+        console.error("Error procesando imagen:", error);
+        setValidationMessage("Hubo un problema procesando la imagen.");
+        dispatch(setLoading(false));
+        return;
+      }
+    }
+
     const cleanedData = Object.fromEntries(
       Object.entries({
         ...inputs,
+        id: firebaseId,
         userId: user?.email,
         coordinates: coordinates,
+        imageUrl: imageUrl,
       }).filter(([_, value]) => value !== undefined)
     );
     //crear el nuevo objeto
@@ -118,6 +165,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     { key: "documentNumber", label: "Número de Documento", type: "number" },
     { key: "address", label: "Dirección" },
     { key: "date", label: "Fecha de Nacimiento", type: "date" },
+    { key: "image", label: "Foto del DNI", type: "file" },
   ];
 
   const phoneFieldsConfig = [
@@ -125,23 +173,27 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     { key: "color", label: "Color" },
     { key: "date", label: "Fecha de Encuentro", type: "date" },
     { key: "information", label: "Información" },
+    { key: "image", label: "Foto del Teléfono", type: "file" },
   ];
 
   const clothingFieldsConfig = [
     { key: "brand", label: "Marca" },
     { key: "date", label: "Fecha de Encuentro", type: "date" },
     { key: "description", label: "Descripción de la prenda" },
+    { key: "image", label: "Foto de la Prenda", type: "file" },
   ];
   const cashFieldsConfig = [
     { key: "amount", label: "Cantidad", type: "number" },
     { key: "date", label: "Fecha", type: "date" },
     { key: "location", label: "Localidad" },
+    { key: "image", label: "Foto (Opcional)", type: "file" },
   ];
 
   const otherFieldsConfig = [
-    { key: "title", label: "Titulo", placeholder:"Ej: Llaves, Valija, etc.." },
+    { key: "title", label: "Titulo", placeholder: "Ej: Llaves, Valija, etc.." },
     { key: "description", label: "Descripción del objeto encontrado" },
     { key: "date", label: "Fecha", type: "date" },
+    { key: "image", label: "Foto del objeto", type: "file" },
   ];
 
   const dniFields: Field[] = selectedOption === "Dni" ? dniFieldsConfig : [];
@@ -161,7 +213,13 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
     ...otherFields,
     { key: "map", label: "Mapa" },
   ];
-  const handleAddressSelect  = ({ address, coordinates }: { address: string; coordinates: [number, number] }) => {
+  const handleAddressSelect = ({
+    address,
+    coordinates,
+  }: {
+    address: string;
+    coordinates: [number, number];
+  }) => {
     handleInputChange("map", address);
     setCoordinates(coordinates);
   };
@@ -198,7 +256,7 @@ const ItemInputForm: React.FC<ItemInputFormProps> = ({
             ReadOnly={isReadOnly}
           />
         </div>
-      )}      
+      )}
     </div>
   );
 };

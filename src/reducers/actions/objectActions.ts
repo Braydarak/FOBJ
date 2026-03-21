@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
 import { firestore } from "../../firebase";
 import { UPDATE_INPUTS,
     UPDATE_SUCCESS,
@@ -89,7 +89,14 @@ export const writeToFirebase = (data: any, selectedOption: string): AppThunk => 
           }
         }
   
-        await addDoc(collection(firestore, selectedOption), data);
+       // --- AQUÍ ESTÁ EL CAMBIO ---
+        // 1. Apuntamos a la colección y le pasamos el ID específico (data.id)
+        const docRef = doc(firestore, selectedOption, data.id);
+        
+        // 2. Usamos setDoc para escribir la data en esa referencia
+        await setDoc(docRef, data);
+        // ---------------------------
+
         dispatch({ type: UPDATE_SUCCESS });
       } catch (e: any) {
         dispatch({ type: UPDATE_ERROR, payload: e.message });

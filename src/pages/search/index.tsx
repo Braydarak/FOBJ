@@ -255,6 +255,7 @@ const Search: React.FC = () => {
                   >
                     <ObjectCard
                       category={translations[selectedOption] || selectedOption}
+                      imageUrl={item.imageUrl}
                       objectTop={cardTitles.top}
                       dataTop={truncateString(
                         item.documentNumber ||
