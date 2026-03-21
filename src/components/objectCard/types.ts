@@ -9,6 +9,7 @@ export type ObjectCardProps = {
   coordinates?: [number, number];
   onClick?: () => void;
   category: string;
+  imageUrl?: string;
 };
   
 
