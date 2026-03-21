@@ -277,7 +277,7 @@ const Search: React.FC = () => {
                       coordinates={
                         item.coordinates && item.coordinates.length === 2
                           ? [item.coordinates[0], item.coordinates[1]]
-                          : [undefined, undefined]
+                          : undefined
                       }
                       onClick={() => handleCardClick(item)}
                     />
