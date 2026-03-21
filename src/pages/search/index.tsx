@@ -275,7 +275,7 @@ const Search: React.FC = () => {
                       dataBottom={item.date}
                       address={item.map}
                       coordinates={
-                        item.coordinates && item.coordinates.length === 2
+                        item.coordinates && item.coordinates.length === 2 && typeof item.coordinates[0] === 'number' && typeof item.coordinates[1] === 'number'
                           ? [item.coordinates[0], item.coordinates[1]]
                           : undefined
                       }
